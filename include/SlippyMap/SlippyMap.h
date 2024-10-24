@@ -1,0 +1,6 @@
+#ifndef SLIPPYMAP_LIBRARY_H
+#define SLIPPYMAP_LIBRARY_H
+
+void hello();
+
+#endif //SLIPPYMAP_LIBRARY_H
