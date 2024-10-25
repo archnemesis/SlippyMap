@@ -42,7 +42,8 @@ target_link_libraries(SlippyMap Qt5::Network)
 
 set_target_properties(SlippyMap PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(SlippyMap PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
-set_target_properties(SlippyMap PROPERTIES PUBLIC_HEADER
+
+set(SLIPPYMAP_PUBLIC_HEADERS
         include/SlippyMap/SlippyMap.h
         include/SlippyMap/SlippyMapLayer.h
         include/SlippyMap/SlippyMapLayerManager.h
@@ -51,6 +52,8 @@ set_target_properties(SlippyMap PROPERTIES PUBLIC_HEADER
         include/SlippyMap/SlippyMapWidget.h
         include/SlippyMap/SlippyMapWidgetLayer.h
 )
+
+set_target_properties(SlippyMap PROPERTIES PUBLIC_HEADER "${SLIPPYMAP_PUBLIC_HEADERS}")
 
 include(GNUInstallDirs)
 
