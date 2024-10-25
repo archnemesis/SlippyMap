@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     //
     // Create and configure map widget.
     //
-	SlippyMapWidget map;
+    SlippyMapWidget map;
 
     //
     // Set up the map tile layer.
