@@ -1,4 +1,4 @@
-#include "SlippyMap/SlippyMapLayerMarker.h"
+#include "SlippyMap/SlippyMapWidgetMarker.h"
 
 #include <QPainter>
 #include <QPoint>
@@ -13,7 +13,7 @@
 
 using namespace SlippyMap;
 
-SlippyMapLayerMarker::SlippyMapLayerMarker(QObject *parent) :
+SlippyMapWidgetMarker::SlippyMapWidgetMarker(QObject *parent) :
         SlippyMapLayerObject (parent),
         m_color(Qt::white),
         m_radius(5)
@@ -21,8 +21,8 @@ SlippyMapLayerMarker::SlippyMapLayerMarker(QObject *parent) :
     initStyle();
 }
 
-SlippyMapLayerMarker::SlippyMapLayerMarker(const QPointF &position, QObject *parent) :
-        SlippyMapLayerMarker (parent)
+SlippyMapWidgetMarker::SlippyMapWidgetMarker(const QPointF &position, QObject *parent) :
+        SlippyMapWidgetMarker (parent)
 {
     m_position = position;
 }
@@ -65,7 +65,7 @@ SlippyMapLayerMarker::SlippyMapLayerMarker(const QPointF &position, QObject *par
 //     return stream;
 // }
 
-void SlippyMapLayerMarker::draw(QPainter *painter, const QTransform &transform, int zoom)
+void SlippyMapWidgetMarker::draw(QPainter *painter, const QTransform &transform, ObjectState state)
 {
     QPointF pos = transform.map(m_position);
 
@@ -136,12 +136,12 @@ void SlippyMapLayerMarker::draw(QPainter *painter, const QTransform &transform, 
     }
 }
 
-bool SlippyMapLayerMarker::isIntersectedBy(const QRectF &rect) const
+bool SlippyMapWidgetMarker::isIntersectedBy(const QRectF &rect) const
 {
     return rect.contains(m_position);
 }
 
-bool SlippyMapLayerMarker::contains(const QPointF &point, int zoom) const
+bool SlippyMapWidgetMarker::contains(const QPointF &point, int zoom) const
 {
     double deg_per_pixel = (360.0 / pow(2.0, zoom)) / 256.0;
     double deg_radius = deg_per_pixel * m_radius;
@@ -153,63 +153,69 @@ bool SlippyMapLayerMarker::contains(const QPointF &point, int zoom) const
     return deg_rect.contains(point);
 }
 
-void SlippyMapLayerMarker::setPosition(const QPointF &position)
+const QSizeF SlippyMapWidgetMarker::size() const
+{
+    double diameter = m_radius * 2;
+    return QSizeF(diameter, diameter);
+}
+
+void SlippyMapWidgetMarker::setPosition(const QPointF &position)
 {
     m_position = position;
 }
 
-void SlippyMapLayerMarker::setColor(const QColor &color)
+void SlippyMapWidgetMarker::setColor(const QColor &color)
 {
     m_color = color;
 }
 
-void SlippyMapLayerMarker::setRadius(int radius)
+void SlippyMapWidgetMarker::setRadius(int radius)
 {
     m_radius = radius;
 }
 
-void SlippyMapLayerMarker::setEditable(bool editable)
+void SlippyMapWidgetMarker::setEditable(bool editable)
 {
     m_editable = editable;
 }
 
-void SlippyMapLayerMarker::setIcon(const QImage &icon)
+void SlippyMapWidgetMarker::setIcon(const QImage &icon)
 {
     m_icon = icon;
     m_pixmap = QPixmap::fromImage(m_icon);
 }
 
-bool SlippyMapLayerMarker::isEditable() const
+bool SlippyMapWidgetMarker::isEditable() const
 {
     return m_editable;
 }
 
-const QPointF& SlippyMapLayerMarker::position() const
+const QPointF SlippyMapWidgetMarker::position() const
 {
     return m_position;
 }
 
-const QColor &SlippyMapLayerMarker::color() const
+const QColor &SlippyMapWidgetMarker::color() const
 {
     return m_color;
 }
 
-const QImage &SlippyMapLayerMarker::icon() const
+const QImage &SlippyMapWidgetMarker::icon() const
 {
     return m_icon;
 }
 
-const QString SlippyMapLayerMarker::statusBarText() const
+const QString SlippyMapWidgetMarker::statusBarText() const
 {
     return m_label;
 }
 
-int SlippyMapLayerMarker::radius() const
+int SlippyMapWidgetMarker::radius() const
 {
     return m_radius;
 }
 
-void SlippyMapLayerMarker::initStyle()
+void SlippyMapWidgetMarker::initStyle()
 {
     QPalette systemPalette = QGuiApplication::palette();
 

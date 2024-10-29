@@ -494,7 +494,7 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
                 for (SlippyMapLayerObject *obj : layer->objects()) {
                     if (obj->isVisible() && !obj->isActive()) {
                         if (obj->isIntersectedBy(bbox)) {
-                            obj->draw(&painter, m3, m_zoomLevel);
+                            obj->draw(&painter, m3, SlippyMapLayerObject::NormalState);
                         }
                     }
                 }
@@ -503,7 +503,7 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
                 for (SlippyMapLayerObject *obj : layer->objects()) {
                     if (obj->isVisible() && obj->isActive()) {
                         if (obj->isIntersectedBy(bbox)) {
-                            obj->draw(&painter, m3, m_zoomLevel);
+                            obj->draw(&painter, m3, SlippyMapLayerObject::SelectedState);
                         }
                     }
                 }
@@ -589,6 +589,12 @@ bool SlippyMapWidget::event(QEvent *event)
         }
         return true;
     }
+    if (event->type() == QEvent::MouseButtonDblClick) {
+        if (m_activeObject != nullptr) {
+            emit objectDoubleClicked(m_activeObject);
+        }
+        return true;
+    }
     return QWidget::event(event);
 }
 
@@ -637,6 +643,21 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
                         }
                     }
                 }
+
+                // user clicked outside of any object, deselect currently
+                // selected object (if set)
+                if (m_activeObject != nullptr) {
+                    for (auto *layer : m_layerManager->layers()) {
+                        if (layer->contains(m_activeObject)) {
+                            layer->deactivateAll();
+                            m_activeObject->setActive(false);
+                            emit objectDeactivated(m_activeObject);
+                            m_activeObject = nullptr;
+                            update();
+                            return;
+                        }
+                    }
+                }
             }
 
             m_activeObject = nullptr;
@@ -670,6 +691,22 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void SlippyMapWidget::mouseMoveEvent(QMouseEvent *event)
 {
+    if (m_drawMode == NoDrawing) {
+        if (m_activeObject != nullptr) {
+            QPoint mousePos = event->pos();
+            double mouseLat = widgetY2lat(mousePos.y());
+            double mouseLon = widgetX2long(mousePos.x());
+            QPointF mouseCoords = QPointF(mouseLon, mouseLat);
+
+            if (m_activeObject->contains(mouseCoords, m_zoomLevel)) {
+                setCursor(Qt::SizeAllCursor);
+                return;
+            }
+
+            setCursor(Qt::ArrowCursor);
+        }
+    }
+
     if (m_dragButton != Qt::LeftButton) return;
 
     double scale_factor = 1 / cos(m_lat * (M_PI / 180.0));
@@ -683,9 +720,10 @@ void SlippyMapWidget::mouseMoveEvent(QMouseEvent *event)
     if (m_drawMode != NoDrawing) {
         switch (m_drawMode) {
             case RectDrawing:
-            case EllipseDrawing:
+            case EllipseDrawing: {
                 m_drawModeRect_bottomRight = pos;
                 break;
+            }
             default:
                 break;
         }
@@ -890,7 +928,7 @@ double SlippyMapWidget::widgetX2long(qint32 x)
 
 double SlippyMapWidget::widgetY2lat(qint32 y)
 {
-    double scale_factor = 1 / cos(m_lat * (M_PI / 180.0));
+    double scale_factor = 1 / cos(m_lat * (M_PI / 180.0));  // 1 / cos(lat in radians)
     double deg_per_pixel = (360.0 / pow(2.0, m_zoomLevel)) / 256.0;
     double deg_per_pixel_y = deg_per_pixel / scale_factor;
     double height_deg = deg_per_pixel_y * height();

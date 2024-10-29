@@ -30,8 +30,8 @@ namespace SlippyMap
         void showAll();
         void hideAll();
 
-        signals:
-            void objectAdded(SlippyMapLayerObject *object);
+    signals:
+        void objectAdded(SlippyMapLayerObject *object);
         void objectRemoved(SlippyMapLayerObject *object);
         void objectUpdated(SlippyMapLayerObject *object);
 

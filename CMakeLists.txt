@@ -23,17 +23,19 @@ add_library(SlippyMap
         include/SlippyMap/SlippyMap.h
         include/SlippyMap/SlippyMapLayer.h
         include/SlippyMap/SlippyMapLayerManager.h
-        include/SlippyMap/SlippyMapLayerMarker.h
+        include/SlippyMap/SlippyMapWidgetMarker.h
         include/SlippyMap/SlippyMapLayerObject.h
         include/SlippyMap/SlippyMapWidget.h
         include/SlippyMap/SlippyMapWidgetLayer.h
+        include/SlippyMap/SlippyMapLayerPolygon.h
         src/SlippyMap.cpp
         src/SlippyMapLayer.cpp
         src/SlippyMapLayerManager.cpp
-        src/SlippyMapLayerMarker.cpp
+        src/SlippyMapWidgetMarker.cpp
         src/SlippyMapLayerObject.cpp
         src/SlippyMapWidget.cpp
         src/SlippyMapWidgetLayer.cpp
+        src/SlippyMapLayerPolygon.cpp
 )
 
 target_include_directories(SlippyMap PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -47,10 +49,11 @@ set(SLIPPYMAP_PUBLIC_HEADERS
         include/SlippyMap/SlippyMap.h
         include/SlippyMap/SlippyMapLayer.h
         include/SlippyMap/SlippyMapLayerManager.h
-        include/SlippyMap/SlippyMapLayerMarker.h
+        include/SlippyMap/SlippyMapWidgetMarker.h
         include/SlippyMap/SlippyMapLayerObject.h
         include/SlippyMap/SlippyMapWidget.h
         include/SlippyMap/SlippyMapWidgetLayer.h
+        include/SlippyMap/SlippyMapLayerPolygon.h
 )
 
 set_target_properties(SlippyMap PROPERTIES PUBLIC_HEADER "${SLIPPYMAP_PUBLIC_HEADERS}")

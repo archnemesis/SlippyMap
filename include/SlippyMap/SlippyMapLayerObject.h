@@ -14,11 +14,6 @@ namespace SlippyMap
     class SlippyMapLayerObject : public QObject
     {
         Q_OBJECT
-        Q_PROPERTY(QString label MEMBER m_label NOTIFY labelChanged)
-        Q_PROPERTY(QString description MEMBER m_description NOTIFY descriptionChanged)
-        Q_PROPERTY(bool visible MEMBER m_visible READ isVisible NOTIFY visibilityChanged)
-        Q_PROPERTY(bool movable MEMBER m_movable READ isMovable NOTIFY movabilityChanged)
-        Q_PROPERTY(bool active MEMBER m_active READ isActive NOTIFY activeChanged)
     public:
         enum ObjectState {
             NormalState,
@@ -27,61 +22,47 @@ namespace SlippyMap
         };
 
         explicit SlippyMapLayerObject(QObject *parent = nullptr);
-
-        /* Virtual Methods ----- */
-
-        /**
-         * @brief draw
-         * @param painter
-         * @param transform
-         * @param state
-         */
-        virtual void draw(QPainter *painter, const QTransform &transform, int zoom) = 0;
-
-        /**
-         * @brief Does this object contain points within the given rect (geo coordinates)?
-         * @param rect
-         * @return
-         */
-        virtual bool isIntersectedBy(const QRectF &rect) const = 0;
-
-        /**
-         * @brief Is the given point within the visible boundaries of the object (screen coordinates)?
-         * @param point the point to test for
-         * @param zoom the current zoom level
-         * @return true if the given point falls within the visible boundaries of the object, false otherwise
-         */
-        virtual bool contains(const QPointF &point, int zoom) const = 0;
-
-        virtual const QString statusBarText() const = 0;
-
-        /* Property Getters ----- */
-        const QString &label() const;
-        const QString &description() const;
-        bool isVisible() const;
-        bool isMovable() const;
-        bool isActive() const;
-
-        /* Property Setters ----- */
-        void setLabel(const QString& label);
+        virtual void draw(QPainter *painter, const QTransform &transform, ObjectState state = NormalState) = 0;
+        virtual void setMovable(bool movable);
+        void setActive(bool active);
+        void setBrush(QBrush brush);
+        void setPen(QPen pen);
+        virtual bool contains(const QPointF& point, int zoom) const = 0;
+        virtual bool isIntersectedBy(const QRectF& rect) const = 0;
+        virtual bool isMovable();
+        virtual const QPointF position() const = 0;
+        virtual const QSizeF size() const = 0;
+        virtual QString statusBarText();
+        QString label();
+        QString description();
+        void setLabel(const QString& name);
         void setDescription(const QString& description);
         void setVisible(bool visible);
-        void setMovable(bool movable);
-        void setActive(bool active);
+        bool isVisible();
+        bool isActive();
 
-        signals:
-        void labelChanged();
-        void descriptionChanged();
-        void visibilityChanged();
-        void movabilityChanged();
+    signals:
+        void somethingHappened();
         void activeChanged();
+        void labelChanged();
+        void visibilityChanged();
 
     protected:
         QString m_label;
         QString m_description;
-        bool m_visible = true;
-        bool m_movable = false;
+        QBrush m_brush;
+        QBrush m_activeBrush;
+        QBrush m_selectedBrush;
+        QBrush m_selectionHandleBrush;
+        QPen m_pen;
+        QPen m_activePen;
+        QPen m_selectedPen;
+        QPen m_selectionHandlePen;
+        int m_resizeHandleWidth = 6;
         bool m_active = false;
+        bool m_visible = true;
+        bool m_movable = true;
+        void drawResizeHandle(QPainter *painter, QPoint point) const;
     };
 }
 

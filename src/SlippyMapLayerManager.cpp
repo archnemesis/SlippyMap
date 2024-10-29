@@ -165,7 +165,8 @@ void SlippyMapLayerManager::addLayer(SlippyMapLayer *layer)
     int last = first + 1;
     beginInsertRows(QModelIndex(), first, last);
     m_layers.append(layer);
-    connect(layer, &SlippyMapLayer::objectUpdated, this, &SlippyMapLayerManager::layerObjectUpdated);
+    connect(layer, &SlippyMapLayer::objectAdded, this, &SlippyMapLayerManager::layer_onObjectAdded);
+    connect(layer, &SlippyMapLayer::objectUpdated, this, &SlippyMapLayerManager::layer_onObjectUpdated);
     endInsertRows();
 }
 
@@ -180,6 +181,23 @@ void SlippyMapLayerManager::addLayerObject(SlippyMapLayer *layer, SlippyMapLayer
     beginInsertRows(createIndex(m_layers.indexOf(layer), 0, layer), first, last);
     layer->addObject(object);
     endInsertRows();
+}
+
+void SlippyMapLayerManager::layer_onObjectAdded(SlippyMapLayerObject* object)
+{
+    Q_CHECK_PTR(object);
+
+    // find out which row it belongs to
+    int r = 0;
+    for (int i = 0; i < m_layers.size(); i++) {
+        if (m_layers.at(i)->contains(object)) {
+            r = i;
+        }
+    }
+
+    QModelIndex begin = index(r, 0);
+    QModelIndex end = index(m_layers.at(r)->indexOf(object), 0, index(r, 0));
+    emit dataChanged(begin, end);
 }
 
 void SlippyMapLayerManager::addLayerObject(SlippyMapLayerObject *object)
@@ -292,7 +310,7 @@ QList<SlippyMapLayerObject *> SlippyMapLayerManager::objectsAtPoint(QPointF poin
     return objects;
 }
 
-void SlippyMapLayerManager::layerObjectUpdated(SlippyMapLayerObject *object)
+void SlippyMapLayerManager::layer_onObjectUpdated(SlippyMapLayerObject *object)
 {
     int r = 0;
     for (int i = 0; i < m_layers.size(); i++) {
@@ -301,7 +319,7 @@ void SlippyMapLayerManager::layerObjectUpdated(SlippyMapLayerObject *object)
         }
     }
 
-    QModelIndex begin = index(m_layers.at(r)->indexOf(object), 0, index(r, 0));
+    QModelIndex begin = index(r, 0);
     QModelIndex end = index(m_layers.at(r)->indexOf(object), 0, index(r, 0));
     emit dataChanged(begin, end);
 }

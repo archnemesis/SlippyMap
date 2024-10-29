@@ -4,41 +4,44 @@ using namespace SlippyMap;
 
 SlippyMapLayerObject::SlippyMapLayerObject(QObject *parent) : QObject(parent)
 {
+    m_pen.setStyle(Qt::SolidLine);
+    m_pen.setCosmetic(true);
+    m_pen.setWidth(2);
+    m_pen.setColor(QColor(153, 153, 102, 128));
+    m_pen.setJoinStyle(Qt::MiterJoin);
+    m_pen.setCapStyle(Qt::SquareCap);
 
-}
+    m_brush.setStyle(Qt::SolidPattern);
+    m_brush.setColor(QColor(255, 255, 51, 128));
 
-const QString &SlippyMapLayerObject::label() const
-{
-    return m_label;
-}
+    m_selectionHandlePen.setColor(Qt::black);
+    m_selectionHandlePen.setStyle(Qt::SolidLine);
+    m_selectionHandlePen.setCosmetic(true);
+    m_selectionHandlePen.setWidth(1);
+    m_selectionHandlePen.setJoinStyle(Qt::MiterJoin);
+    m_selectionHandlePen.setCapStyle(Qt::SquareCap);
 
-const QString &SlippyMapLayerObject::description() const
-{
-    return m_description;
-}
+    m_selectionHandleBrush.setColor(Qt::white);
+    m_selectionHandleBrush.setStyle(Qt::SolidPattern);
 
-void SlippyMapLayerObject::setLabel(const QString &label)
-{
-    m_label = label;
-    emit labelChanged();
-}
+    m_activePen.setStyle(Qt::DotLine);
+    m_activePen.setCosmetic(true);
+    m_activePen.setColor(Qt::white);
+    m_activePen.setWidth(2);
+    m_activeBrush.setStyle(Qt::SolidPattern);
+    m_activeBrush.setColor(Qt::gray);
 
-void SlippyMapLayerObject::setDescription(const QString &description)
-{
-    m_description = description;
-    emit descriptionChanged();
-}
-
-void SlippyMapLayerObject::setVisible(bool visible)
-{
-    m_visible = visible;
-    emit visibilityChanged();
+    m_selectedPen.setStyle(Qt::DotLine);
+    m_selectedPen.setCosmetic(true);
+    m_selectedPen.setColor(Qt::darkBlue);
+    m_selectedPen.setWidth(2);
+    m_selectedBrush.setStyle(Qt::SolidPattern);
+    m_selectedBrush.setColor(Qt::lightGray);
 }
 
 void SlippyMapLayerObject::setMovable(bool movable)
 {
-    m_movable = movable;
-    emit movabilityChanged();
+    m_movable = true;
 }
 
 void SlippyMapLayerObject::setActive(bool active)
@@ -47,17 +50,73 @@ void SlippyMapLayerObject::setActive(bool active)
     emit activeChanged();
 }
 
-bool SlippyMapLayerObject::isVisible() const
+QString SlippyMapLayerObject::label()
+{
+    return m_label;
+}
+
+QString SlippyMapLayerObject::description()
+{
+    return m_description;
+}
+
+void SlippyMapLayerObject::setLabel(const QString &name)
+{
+    m_label = name;
+    emit labelChanged();
+}
+
+void SlippyMapLayerObject::setDescription(const QString &description)
+{
+    m_description = description;
+}
+
+void SlippyMapLayerObject::setVisible(bool visible)
+{
+    m_visible = visible;
+    emit visibilityChanged();
+}
+
+bool SlippyMapLayerObject::isVisible()
 {
     return m_visible;
 }
 
-bool SlippyMapLayerObject::isMovable() const
+bool SlippyMapLayerObject::isActive()
+{
+    return m_active;
+}
+
+void SlippyMapLayerObject::setBrush(QBrush brush)
+{
+    m_brush = brush;
+}
+
+void SlippyMapLayerObject::setPen(QPen pen)
+{
+    m_pen = pen;
+}
+
+bool SlippyMapLayerObject::isMovable()
 {
     return m_movable;
 }
 
-bool SlippyMapLayerObject::isActive() const
+QString SlippyMapLayerObject::statusBarText()
 {
-    return m_active;
+    return {""};
 }
+
+void SlippyMapLayerObject::drawResizeHandle(QPainter *painter, QPoint point) const
+{
+    painter->setBrush(m_selectionHandleBrush);
+    painter->setPen(m_selectionHandlePen);
+    painter->drawRect(
+                (point.x() - (m_resizeHandleWidth / 2)),
+                (point.y() - (m_resizeHandleWidth / 2)),
+                m_resizeHandleWidth,
+                m_resizeHandleWidth);
+}
+
+
+

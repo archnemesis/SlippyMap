@@ -1,7 +1,7 @@
 #ifndef SLIPPYMAPLAYERMARKER_H
 #define SLIPPYMAPLAYERMARKER_H
 
-#include "SlippyMapLayerObject.h"
+#include "SlippyMap/SlippyMapLayerObject.h"
 
 #include <QPixmap>
 #include <QImage>
@@ -9,11 +9,12 @@
 #include <QColor>
 #include <QBrush>
 #include <QPen>
+#include <QSizeF>
 #include <QVariant>
 
 namespace SlippyMap
 {
-    class SlippyMapLayerMarker : public SlippyMapLayerObject
+    class SlippyMapWidgetMarker : public SlippyMapLayerObject
     {
         Q_OBJECT
             Q_PROPERTY(QPointF position MEMBER m_position READ position WRITE setPosition NOTIFY positionChanged)
@@ -23,11 +24,12 @@ namespace SlippyMap
             Q_PROPERTY(bool editable MEMBER m_editable READ isEditable)
 
         public:
-        SlippyMapLayerMarker(QObject *parent = nullptr);
-        SlippyMapLayerMarker(const QPointF &position, QObject *parent = nullptr);
+        SlippyMapWidgetMarker(QObject *parent = nullptr);
+        SlippyMapWidgetMarker(const QPointF &position, QObject *parent = nullptr);
 
-        void draw(QPainter *painter, const QTransform &transform, int zoom);
+        void draw(QPainter *painter, const QTransform &transform, ObjectState state) override;
         bool contains(const QPointF &point, int zoom) const;
+        const QSizeF size() const override;
         bool isIntersectedBy(const QRectF &rect) const;
         const QString statusBarText() const;
 
@@ -37,7 +39,7 @@ namespace SlippyMap
         void setEditable(bool editable);
         void setIcon(const QImage& icon);
 
-        const QPointF& position() const;
+        const QPointF position() const;
         bool isEditable() const;
         const QColor& color() const;
         const QImage& icon() const;

@@ -1,6 +1,8 @@
 #include "SlippyMap/SlippyMapLayer.h"
 #include "SlippyMap/SlippyMapLayerObject.h"
 
+#include <QDebug>
+
 using namespace SlippyMap;
 
 SlippyMapLayer::SlippyMapLayer(QObject *parent) : QObject(parent)

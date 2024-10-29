@@ -123,8 +123,8 @@ namespace SlippyMap
         void contextMenuEvent(QContextMenuEvent *event) override;
         QPixmap drawLegend(SlippyMapWidgetLayer *layer, int width, int height);
 
-        signals:
-            void centerChanged(double latitude, double longitude);
+    signals:
+        void centerChanged(double latitude, double longitude);
         void zoomLevelChanged(int zoom);
         void tileRequestInitiated();
         void tileRequestFinished();
@@ -138,6 +138,8 @@ namespace SlippyMap
         void polygonSelected(const QVector<QPoint> &points);
         void drawModeChanged(DrawMode mode);
         void objectActivated(SlippyMapLayerObject *object);
+        void objectDeactivated(SlippyMapLayerObject *object);
+        void objectDoubleClicked(SlippyMapLayerObject *object);
         void currentLocationButtonClicked();
 
     private:

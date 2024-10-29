@@ -54,8 +54,9 @@ namespace SlippyMap
         QFont m_hiddenFont;
         QFont m_activeFont;
 
-        protected slots:
-            void layerObjectUpdated(SlippyMapLayerObject *object);
+    protected slots:
+        void layer_onObjectAdded(SlippyMapLayerObject *object);
+        void layer_onObjectUpdated(SlippyMapLayerObject *object);
     };
 }
 
