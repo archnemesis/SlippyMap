@@ -430,11 +430,30 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
 
+    //
+    // draw base layers first
+    //
     for (SlippyMapWidgetLayer *layer : m_layers) {
-        for (int i = 0; i < m_layerTileMaps[layer].size(); i++) {
-            Tile *t = m_layerTileMaps[layer].at(i);
-            if (t->isLoaded()) {
-                painter.drawPixmap(t->point(), t->pixmap());
+        if (layer->isBaseLayer()) {
+            for (int i = 0; i < m_layerTileMaps[layer].size(); i++) {
+                Tile *t = m_layerTileMaps[layer].at(i);
+                if (t->isLoaded()) {
+                    painter.drawPixmap(t->point(), t->pixmap());
+                }
+            }
+        }
+    }
+
+    //
+    // overlay layers on top
+    //
+    for (SlippyMapWidgetLayer *layer : m_layers) {
+        if (!layer->isBaseLayer()) {
+            for (int i = 0; i < m_layerTileMaps[layer].size(); i++) {
+                Tile *t = m_layerTileMaps[layer].at(i);
+                if (t->isLoaded()) {
+                    painter.drawPixmap(t->point(), t->pixmap());
+                }
             }
         }
     }
@@ -687,6 +706,10 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
         emit drawModeChanged(NoDrawing);
         update();
     }
+    else {
+        qDebug() << "Mouse button release!";
+        emit dragFinished();
+    }
 }
 
 void SlippyMapWidget::mouseMoveEvent(QMouseEvent *event)
@@ -935,6 +958,14 @@ double SlippyMapWidget::widgetY2lat(qint32 y)
     double top_deg = m_lat + (height_deg / 2);
     double ypos = top_deg - (deg_per_pixel_y * y);
     return ypos;
+}
+
+double SlippyMapWidget::latitude() const {
+    return m_lat;
+}
+
+double SlippyMapWidget::longitude() const {
+    return m_lon;
 }
 
 double SlippyMapWidget::degPerPixelX() const

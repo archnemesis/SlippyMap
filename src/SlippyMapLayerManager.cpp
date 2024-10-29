@@ -216,7 +216,6 @@ void SlippyMapLayerManager::removeLayerObject(SlippyMapLayer *layer, SlippyMapLa
     beginRemoveRows(createIndex(m_layers.indexOf(layer), 0, layer), layer->objects().indexOf(object), layer->objects().indexOf(object));
     layer->takeObject(object);
     endRemoveRows();
-    delete object;
 }
 
 void SlippyMapLayerManager::takeLayer(SlippyMapLayer *layer)

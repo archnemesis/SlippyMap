@@ -73,6 +73,8 @@ namespace SlippyMap
         double degPerPixelY() const;
         double widgetX2long(qint32 x);
         double widgetY2lat(qint32 y);
+        double latitude() const;
+        double longitude() const;
         int zoomLevel() const;
         qint32 lat2widgety(double lat);
         qint32 long2widgetX(double lon);
@@ -125,6 +127,7 @@ namespace SlippyMap
 
     signals:
         void centerChanged(double latitude, double longitude);
+        void dragFinished();
         void zoomLevelChanged(int zoom);
         void tileRequestInitiated();
         void tileRequestFinished();
