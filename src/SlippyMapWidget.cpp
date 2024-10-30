@@ -1,18 +1,14 @@
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
+
 #include "SlippyMap/SlippyMapWidget.h"
 #include "SlippyMap/SlippyMapWidgetLayer.h"
 #include "SlippyMap/SlippyMapLayer.h"
 #include "SlippyMap/SlippyMapLayerManager.h"
 #include "SlippyMap/SlippyMapLayerObject.h"
 
-#ifndef _USE_MATH_DEFINES
-#define _USE_MATH_DEFINES
-#endif
-
 #include <cmath>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 #include <QDebug>
 #include <QGuiApplication>
