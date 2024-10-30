@@ -3,10 +3,8 @@
 
 #include <cmath>
 #include <QTypeInfo>
+#include <QtCore/qglobal.h>
 
-namespace SlippyMap
-{
-
-}
+#define SLIPPYMAPSHARED_EXPORT Q_DECL_EXPORT
 
 #endif //SLIPPYMAP_LIBRARY_H

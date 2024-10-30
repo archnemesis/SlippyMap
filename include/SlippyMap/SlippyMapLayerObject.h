@@ -5,13 +5,13 @@
 #ifndef SLIPPYMAPLAYEROBJECT_H
 #define SLIPPYMAPLAYEROBJECT_H
 
-#include <QObject>
+#include <SlippyMap/SlippyMap.h>
 #include <QPainter>
 #include <QBrush>
 
 namespace SlippyMap
 {
-    class SlippyMapLayerObject : public QObject
+    class SLIPPYMAPSHARED_EXPORT SlippyMapLayerObject : public QObject
     {
         Q_OBJECT
     public:

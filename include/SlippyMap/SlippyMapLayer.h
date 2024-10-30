@@ -1,6 +1,8 @@
 #ifndef SLIPPYMAPLAYER_H
 #define SLIPPYMAPLAYER_H
 
+#include <SlippyMap/SlippyMap.h>
+
 #include <QObject>
 #include <QList>
 
@@ -8,7 +10,7 @@ namespace SlippyMap
 {
     class SlippyMapLayerObject;
 
-    class SlippyMapLayer : public QObject
+    class SLIPPYMAPSHARED_EXPORT SlippyMapLayer : public QObject
     {
         Q_OBJECT
     public:

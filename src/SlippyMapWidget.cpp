@@ -10,6 +10,10 @@
 
 #include <cmath>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #include <QDebug>
 #include <QGuiApplication>
 #include <QPalette>
@@ -1124,15 +1128,15 @@ void SlippyMapWidget::remap()
                             emit tileRequestInitiated();
                             QNetworkReply *reply = m_net->get(req);
                             tile->setPendingReply(reply);
-                            connect(reply,
-                                    &QNetworkReply::errorOccurred,
-                                    [=](QNetworkReply::NetworkError code){
-                                        qWarning() << "Got a network error:" << code;
-                                        if (tile->isDiscarded()) {
-                                            reply->deleteLater();
-                                            delete tile;
-                                        }
-                            });
+                            // connect(reply,
+                            //         &QNetworkReply::errorOccurred,
+                            //         [=](QNetworkReply::NetworkError code){
+                            //             qWarning() << "Got a network error:" << code;
+                            //             if (tile->isDiscarded()) {
+                            //                 reply->deleteLater();
+                            //                 delete tile;
+                            //             }
+                            // });
                             connect(reply,
                                     &QNetworkReply::finished,
                                     [this, tile, layer, cachedFileName, reply]() {

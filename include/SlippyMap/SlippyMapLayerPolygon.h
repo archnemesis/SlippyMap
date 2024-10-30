@@ -1,20 +1,17 @@
 #ifndef SLIPPYMAPWIDGETPOLYGON_H
 #define SLIPPYMAPWIDGETPOLYGON_H
 
+#include <SlippyMap/SlippyMap.h>
 #include <SlippyMap/SlippyMapLayerObject.h>
-
-#define SLIPPYMAPSHARED_EXPORT
 
 #include <QObject>
 #include <QVector>
-#include <QPen>
 #include <QBrush>
 #include <QPainter>
 
 
-namespace SlippyMap
-{
-    class SlippyMapLayerPolygon : public SlippyMapLayerObject
+namespace SlippyMap {
+    class SLIPPYMAPSHARED_EXPORT SlippyMapLayerPolygon : public SlippyMapLayerObject
     {
         Q_OBJECT
     public:

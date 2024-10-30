@@ -1,7 +1,8 @@
 #ifndef SLIPPYMAPLAYERMARKER_H
 #define SLIPPYMAPLAYERMARKER_H
 
-#include "SlippyMap/SlippyMapLayerObject.h"
+#include <SlippyMap/SlippyMap.h>
+#include <SlippyMap/SlippyMapLayerObject.h>
 
 #include <QPixmap>
 #include <QImage>
@@ -14,7 +15,7 @@
 
 namespace SlippyMap
 {
-    class SlippyMapWidgetMarker : public SlippyMapLayerObject
+    class SLIPPYMAPSHARED_EXPORT SlippyMapWidgetMarker : public SlippyMapLayerObject
     {
         Q_OBJECT
             Q_PROPERTY(QPointF position MEMBER m_position READ position WRITE setPosition NOTIFY positionChanged)

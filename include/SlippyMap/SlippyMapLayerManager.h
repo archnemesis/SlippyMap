@@ -1,7 +1,8 @@
 #ifndef SLIPPYMAPLAYERMANAGER_H
 #define SLIPPYMAPLAYERMANAGER_H
 
-#include <QObject>
+#include <SlippyMap/SlippyMap.h>
+
 #include <QAbstractItemModel>
 #include <QList>
 #include <QFont>
@@ -11,7 +12,7 @@ namespace SlippyMap
     class SlippyMapLayer;
     class SlippyMapLayerObject;
 
-    class SlippyMapLayerManager : public QAbstractItemModel
+    class SLIPPYMAPSHARED_EXPORT SlippyMapLayerManager : public QAbstractItemModel
     {
         Q_OBJECT
         public:

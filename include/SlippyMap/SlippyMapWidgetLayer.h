@@ -1,12 +1,12 @@
 #ifndef SLIPPYMAPWIDGETLAYER_H
 #define SLIPPYMAPWIDGETLAYER_H
 
-#include <QObject>
+#include <SlippyMap/SlippyMap.h>
 #include <QPixmap>
 
 namespace SlippyMap
 {
-    class SlippyMapWidgetLayer : public QObject
+    class SLIPPYMAPSHARED_EXPORT SlippyMapWidgetLayer : public QObject
     {
         Q_OBJECT
     public:

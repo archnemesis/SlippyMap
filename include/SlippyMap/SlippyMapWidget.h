@@ -1,6 +1,8 @@
 #ifndef SLIPPYMAPWIDGET_H
 #define SLIPPYMAPWIDGET_H
 
+#include <SlippyMap/SlippyMap.h>
+
 #include <QWidget>
 #include <QPoint>
 #include <QPointF>
