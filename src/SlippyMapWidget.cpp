@@ -715,19 +715,27 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
 void SlippyMapWidget::mouseMoveEvent(QMouseEvent *event)
 {
     if (m_drawMode == NoDrawing) {
-        if (m_activeObject != nullptr) {
-            QPoint mousePos = event->pos();
-            double mouseLat = widgetY2lat(mousePos.y());
-            double mouseLon = widgetX2long(mousePos.x());
-            QPointF mouseCoords = QPointF(mouseLon, mouseLat);
+        QPoint mousePos = event->pos();
+        double mouseLat = widgetY2lat(mousePos.y());
+        double mouseLon = widgetX2long(mousePos.x());
+        QPointF mouseCoords = QPointF(mouseLon, mouseLat);
+        Qt::CursorShape cursorShape = Qt::ArrowCursor;
 
-            if (m_activeObject->contains(mouseCoords, m_zoomLevel)) {
-                setCursor(Qt::SizeAllCursor);
-                return;
+        for (auto *layer : m_layerManager->layers()) {
+            if (layer->isVisible()) {
+                for (auto *object : layer->objects()) {
+                    if (object->contains(mouseCoords, m_zoomLevel)) {
+                        if (object == m_activeObject)
+                            cursorShape = object->activeCursorShape(mouseCoords);
+                        else
+                            cursorShape = object->cursorShape(mouseCoords);
+                        break;
+                    }
+                }
             }
-
-            setCursor(Qt::ArrowCursor);
         }
+
+        setCursor(cursorShape);
     }
 
     if (m_dragButton != Qt::LeftButton) return;

@@ -41,6 +41,41 @@ namespace SlippyMap
         bool isVisible();
         bool isActive();
 
+        /*
+         * Drawing/Editing Support Methods
+         */
+
+        /**
+         * Used to determine if the object has resize
+         * handles that need to be shown when selected.
+         * @return true if the object has resize handles
+         */
+        bool hasResizeHandles() const { return false; }
+
+        /**
+         * Returns the bounding rectangles for the objects
+         * resize handles, used for hit detection.
+         * @return
+         */
+        QList<QRectF> resizeHandles() const { return {}; }
+
+        /**
+         * Return the cursor shape for when the mouse is over
+         * a particular area.
+         * @param point
+         * @return
+         */
+        Qt::CursorShape cursorShape(const QPointF& point) const { return Qt::PointingHandCursor; }
+
+        /**
+         * Return the cursor shape for when the mouse is over
+         * a particular area and it is active.
+         * @param point
+         * @return
+         */
+        Qt::CursorShape activeCursorShape(const QPointF& point) const { return Qt::DragMoveCursor; }
+
+
     signals:
         void somethingHappened();
         void activeChanged();
