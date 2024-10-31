@@ -14,14 +14,17 @@ public:
     explicit SlippyMapLayerPolygonPropertyPage(SlippyMapLayerObject *object);
     virtual QString tabTitle();
     void setupUi() override;
+    void save() override;
+
+public slots:
+    void updateUi() override;
 
 protected:
 
     SlippyMapLayerPolygon *m_polygon;
-    QLineEdit *m_lneX;
-    QLineEdit *m_lneY;
-    QLineEdit *m_lneWidth;
-    QLineEdit *m_lneHeight;
+    QLineEdit *m_strokeColor;
+    QLineEdit *m_strokeWidth;
+    QLineEdit *m_fillColor;
 };
 
 #endif // SLIPPYMAPPOLYGONPROPERTYPAGE_H

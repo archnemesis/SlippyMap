@@ -130,9 +130,9 @@ QString SlippyMapWidget::latLonToString(double lat, double lon)
     }
 
     QString ret = QString("%1 %2 %3 %4")
-            .arg(fabs(lat), 8, 'f', 4, '0')
+            .arg(fabs(lat), 0, 'f', 6, '0')
             .arg(dir_lat)
-            .arg(fabs(lon), 8, 'f', 4, '0')
+            .arg(fabs(lon), 0, 'f', 6, '0')
             .arg(dir_lon);
 
     return ret;
@@ -185,6 +185,24 @@ bool SlippyMapWidget::centerOnCursorWhileZooming() const
 void SlippyMapWidget::setTileCachingEnabled(bool enabled)
 {
     m_cacheTiles = enabled;
+}
+
+void SlippyMapWidget::setDrawingStrokeWidth(int width)
+{
+    m_drawingStrokeWidth = width;
+    m_drawPen.setWidth(width);
+}
+
+void SlippyMapWidget::setDrawingStrokeColor(const QColor &color)
+{
+    m_drawingStrokeColor = color;
+    m_drawPen.setColor(color);
+}
+
+void SlippyMapWidget::setDrawingFillColor(const QColor &color)
+{
+    m_drawingFillColor = color;
+    m_drawBrush.setColor(color);
 }
 
 void SlippyMapWidget::setTileCacheDir(QString dir)
@@ -549,6 +567,7 @@ bool SlippyMapWidget::event(QEvent *event)
         return true;
     }
     if (event->type() == QEvent::MouseButtonDblClick) {
+        qDebug() << "Got double click";
         if (m_activeObject != nullptr) {
             emit objectDoubleClicked(m_activeObject);
         }
@@ -564,10 +583,35 @@ void SlippyMapWidget::mousePressEvent(QMouseEvent *event)
     m_dragStart = event->pos();
     m_dragRealStart = event->pos();
     m_dragButton = event->button();
+    m_dragObject = nullptr;
+
+    QPoint mousePos = event->pos();
+    double mouseLat = widgetY2lat(mousePos.y());
+    double mouseLon = widgetX2long(mousePos.x());
+    QPointF mouseCoords = QPointF(mouseLon, mouseLat);
 
     if (event->button() == Qt::LeftButton) {
         if (m_drawMode == NoDrawing) {
             setCursor(Qt::ClosedHandCursor);
+
+            for (auto *layer: m_layerManager->layers()) {
+                if (layer->isVisible()) {
+                    for (auto *object : layer->objects()) {
+                        if (object->isVisible() && object->isMovable() && object->isEditable()) {
+                            if (object->contains(mouseCoords, m_zoomLevel)) {
+                                m_dragObject = object;
+                                m_activeObject = object;
+                                m_layerManager->setActiveLayer(layer);
+                                layer->deactivateAll();
+                                object->setActive(true);
+                                emit objectActivated(object);
+                                update();
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
         else {
             switch (m_drawMode) {
@@ -661,11 +705,12 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void SlippyMapWidget::mouseMoveEvent(QMouseEvent *event)
 {
+    QPoint mousePos = event->pos();
+    double mouseLat = widgetY2lat(mousePos.y());
+    double mouseLon = widgetX2long(mousePos.x());
+    QPointF mouseCoords = QPointF(mouseLon, mouseLat);
+
     if (m_drawMode == NoDrawing && !m_dragging) {
-        QPoint mousePos = event->pos();
-        double mouseLat = widgetY2lat(mousePos.y());
-        double mouseLon = widgetX2long(mousePos.x());
-        QPointF mouseCoords = QPointF(mouseLon, mouseLat);
         Qt::CursorShape cursorShape = Qt::OpenHandCursor;
 
         for (auto *layer : m_layerManager->layers()) {
@@ -690,8 +735,7 @@ void SlippyMapWidget::mouseMoveEvent(QMouseEvent *event)
     double scale_factor = 1 / cos(m_lat * (M_PI / 180.0));
     double deg_per_pixel = (360.0 / pow(2.0, m_zoomLevel)) / 256.0;
     double deg_per_pixel_y = deg_per_pixel / scale_factor;
-    QPoint pos = event->pos();
-    QPoint diff = pos - m_dragStart;
+    QPoint diff = mousePos - m_dragStart;
 
     //qreal distance = sqrt(pow(diff.x(), 2) + pow(diff.y(), 2));
 
@@ -699,7 +743,7 @@ void SlippyMapWidget::mouseMoveEvent(QMouseEvent *event)
         switch (m_drawMode) {
             case RectDrawing:
             case EllipseDrawing: {
-                m_drawModeRect_bottomRight = pos;
+                m_drawModeRect_bottomRight = mousePos;
                 break;
             }
             default:
@@ -708,21 +752,22 @@ void SlippyMapWidget::mouseMoveEvent(QMouseEvent *event)
         update();
     }
     else {
-        if (m_dragging && m_dragObject != nullptr && m_dragObject->isMovable()) {
-            //QPointF markerPoint = m_dragMarker->position();
-            m_dragStart = pos;
-            //markerPoint.setY(markerPoint.y() - (deg_per_pixel_y * diff.y()));
-            //markerPoint.setX(markerPoint.x() + (deg_per_pixel * diff.x()));
-            //m_dragMarker->setPosition(markerPoint);
-            update();
-        }
-        else if (m_dragging) {
-            m_dragStart = pos;
-            m_lat = m_lat + (deg_per_pixel_y * diff.y());
-            m_lon = m_lon - (deg_per_pixel * diff.x());
-
-            emit centerChanged(m_lat, m_lon);
-            remap();
+        if (m_dragging) {
+            if (m_dragObject != nullptr && m_dragObject->isMovable()) {
+                QPointF markerPoint = m_dragObject->position();
+                markerPoint.setY(markerPoint.y() - (deg_per_pixel_y * diff.y()));
+                markerPoint.setX(markerPoint.x() + (deg_per_pixel * diff.x()));
+                m_dragObject->setPosition(markerPoint);
+                m_dragStart = mousePos;
+                update();
+            }
+            else {
+                m_lat = m_lat + (deg_per_pixel_y * diff.y());
+                m_lon = m_lon - (deg_per_pixel * diff.x());
+                m_dragStart = mousePos;
+                emit centerChanged(m_lat, m_lon);
+                remap();
+            }
         }
     }
 

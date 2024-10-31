@@ -1,26 +1,20 @@
 #include <SlippyMap/SlippyMapLayerPolygonPropertyPage.h>
 
+#include <QDebug>
+#include <QApplication>
 #include <QLineEdit>
 #include <QLabel>
-#include <QGroupBox>
 #include <QVBoxLayout>
 #include <QFormLayout>
 #include <QPointF>
 
 SlippyMapLayerPolygonPropertyPage::SlippyMapLayerPolygonPropertyPage(SlippyMapLayerObject *object):
-    SlippyMapLayerObjectPropertyPage(object)
+    SlippyMapLayerObjectPropertyPage(object),
+    m_strokeWidth(nullptr),
+    m_strokeColor(nullptr),
+    m_fillColor(nullptr)
 {
-    setupUi();
-
     m_polygon = qobject_cast<SlippyMapLayerPolygon*>(object);
-
-    QPointF pos = object->position();
-    QSizeF size = object->size();
-
-    m_lneX->setText(QString("%1").arg(pos.x()));
-    m_lneY->setText(QString("%1").arg(pos.y()));
-    m_lneWidth->setText(QString("%1").arg(size.width()));
-    m_lneHeight->setText(QString("%1").arg(size.height()));
 }
 
 
@@ -31,31 +25,34 @@ QString SlippyMapLayerPolygonPropertyPage::tabTitle()
 
 void SlippyMapLayerPolygonPropertyPage::setupUi()
 {
-    m_lneX = new QLineEdit();
-    m_lneY = new QLineEdit();
-    m_lneWidth = new QLineEdit();
-    m_lneHeight = new QLineEdit();
+    m_strokeColor = new QLineEdit();
+    m_strokeWidth = new QLineEdit();
+    m_fillColor = new QLineEdit();
 
-    QFormLayout *layout = new QFormLayout();
-    layout->addRow(tr("Latitude"), m_lneY);
-    layout->addRow(tr("Longitude"), m_lneX);
+    m_strokeColor->setText(m_polygon->strokeColor().name(QColor::HexArgb));
+    m_strokeWidth->setText(QString("%1").arg(m_polygon->strokeWidth()));
+    m_fillColor->setText(m_polygon->fillColor().name(QColor::HexArgb));
 
-    QGroupBox *grpPosition = new QGroupBox();
-    grpPosition->setTitle(tr("Position"));
-    grpPosition->setLayout(layout);
+    auto *formLayout = new QFormLayout();
+    formLayout->addRow(tr("Stroke Width"), m_strokeWidth);
+    formLayout->addRow(tr("Stroke Color"), m_strokeColor);
+    formLayout->addRow(tr("Fill Color"), m_fillColor);
 
-    layout = new QFormLayout();
-    layout->addRow(tr("Width"), m_lneWidth);
-    layout->addRow(tr("Height"), m_lneHeight);
+    auto *vLayout = new QVBoxLayout();
+    vLayout->addLayout(formLayout);
+    vLayout->addStretch();
 
-    QGroupBox *grpSize = new QGroupBox();
-    grpSize->setTitle(tr("Size"));
-    grpSize->setLayout(layout);
+    setLayout(vLayout);
+}
 
-    QVBoxLayout *vbox = new QVBoxLayout();
-    vbox->addWidget(grpPosition);
-    vbox->addWidget(grpSize);
-    vbox->addStretch();
+void SlippyMapLayerPolygonPropertyPage::updateUi()
+{
+}
 
-    setLayout(vbox);
+void SlippyMapLayerPolygonPropertyPage::save()
+{
+    auto *obj = qobject_cast<SlippyMapLayerPolygon*>(m_object);
+    obj->setFillColor(QColor(m_fillColor->text()));
+    obj->setStrokeColor(QColor(m_strokeColor->text()));
+    obj->setStrokeWidth(m_strokeWidth->text().toInt());
 }

@@ -37,6 +37,7 @@ namespace SlippyMap
         virtual bool isMovable();
         virtual bool isEditable();
         virtual const QPointF position() const = 0;
+        virtual void setPosition(const QPointF& position) = 0;
         virtual const QSizeF size() const = 0;
         virtual QString statusBarText();
         QString label() const;
@@ -84,7 +85,7 @@ namespace SlippyMap
 
 
     signals:
-        void somethingHappened();
+        void updated();
         void activeChanged();
         void labelChanged();
         void visibilityChanged();

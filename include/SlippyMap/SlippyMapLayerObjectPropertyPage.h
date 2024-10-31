@@ -18,22 +18,17 @@ class SlippyMapLayerObjectPropertyPage : public QWidget
     Q_OBJECT
 public:
     explicit SlippyMapLayerObjectPropertyPage(SlippyMapLayerObject *object);
-    SlippyMapLayerObjectPropertyPage(SlippyMapLayerObject *object, SlippyMapLayerManager *layerManager);
     ~SlippyMapLayerObjectPropertyPage() override;
-    virtual QString tabTitle();
-    virtual void save();
-    virtual void setupUi();
+    virtual QString tabTitle() = 0;
+    virtual void save() = 0;
+    virtual void setupUi() = 0;
+
+public slots:
+    virtual void updateUi() = 0;
 
 protected:
 
     SlippyMapLayerObject *m_object;
-    SlippyMapLayerManager *m_layerManager;
-    QLineEdit *m_label;
-    QLineEdit *m_latitude;
-    QLineEdit *m_longitude;
-    QPlainTextEdit *m_description;
-    QCheckBox *m_visibility;
-    QComboBox *m_layerComboBox;
 };
 
 #endif // SLIPPYMAPSHAPEPROPERTYPAGE_H

@@ -164,23 +164,27 @@ const QSizeF SlippyMapWidgetMarker::size() const
 void SlippyMapWidgetMarker::setPosition(const QPointF &position)
 {
     m_position = position;
+    emit updated();
 }
 
 void SlippyMapWidgetMarker::setColor(const QColor &color)
 {
     m_color = color;
     initStyle();
+    emit updated();
 }
 
 void SlippyMapWidgetMarker::setRadius(int radius)
 {
     m_radius = radius;
+    emit updated();
 }
 
 void SlippyMapWidgetMarker::setIcon(const QImage &icon)
 {
     m_icon = icon;
     m_pixmap = QPixmap::fromImage(m_icon);
+    emit updated();
 }
 
 const QPointF SlippyMapWidgetMarker::position() const
@@ -269,7 +273,7 @@ SlippyMapWidgetMarker::SlippyMapWidgetMarker(const SlippyMapWidgetMarker &other)
 {
     setLabel(other.label());
     setDescription(other.description());
-    setPosition(other.position());
+    SlippyMapWidgetMarker::setPosition(other.position());
     setRadius(other.radius());
     setColor(other.color());
     setIcon(other.icon());

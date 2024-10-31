@@ -64,17 +64,20 @@ void SlippyMapLayerObject::setLabel(const QString &name)
 {
     m_label = name;
     emit labelChanged();
+    emit updated();
 }
 
 void SlippyMapLayerObject::setDescription(const QString &description)
 {
     m_description = description;
+    emit updated();
 }
 
 void SlippyMapLayerObject::setVisible(bool visible)
 {
     m_visible = visible;
     emit visibilityChanged();
+    emit updated();
 }
 
 bool SlippyMapLayerObject::isVisible()

@@ -203,6 +203,10 @@ void SlippyMapLayerManager::layer_onObjectAdded(SlippyMapLayerObject* object)
 void SlippyMapLayerManager::addLayerObject(SlippyMapLayerObject *object)
 {
     Q_CHECK_PTR(object);
+
+    if (m_activeLayer == nullptr)
+        m_activeLayer = m_defaultLayer;
+
     Q_ASSERT(m_activeLayer != nullptr);
 
     addLayerObject(m_activeLayer, object);

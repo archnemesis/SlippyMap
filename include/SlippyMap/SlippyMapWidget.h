@@ -88,6 +88,9 @@ namespace SlippyMap
         void setLegendSpacing(int legendSpacing);
         void setTileCacheDir(QString dir);
         void setTileCachingEnabled(bool enabled);
+        void setDrawingStrokeWidth(int width);
+        void setDrawingStrokeColor(const QColor& color);
+        void setDrawingFillColor(const QColor& color);
         void setUserAgent(const QString& userAgent);
         void takeLayer(SlippyMapWidgetLayer *layer);
 
@@ -191,6 +194,8 @@ namespace SlippyMap
         QBrush m_scaleBrush;
         QBrush m_scaleTextBrush;
         QClipboard *m_clipboard;
+        QColor m_drawingStrokeColor;
+        QColor m_drawingFillColor;
         QFont m_scaleTextFont;
         QList<LineSet*> m_lineSets;
         QList<SlippyMapWidgetLayer*> m_expiredLayers;
@@ -215,6 +220,7 @@ namespace SlippyMap
         bool m_dragging = false;
         double m_lat;
         double m_lon;
+        int m_drawingStrokeWidth = 2;
         int m_legendSpacing;
         int m_maxZoom = 18;
         int m_minZoom = 0;

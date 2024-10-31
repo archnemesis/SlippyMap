@@ -22,6 +22,9 @@ public:
     QString tabTitle() override;
     void setupUi() override;
 
+public slots:
+    void updateUi() override;
+
 protected:
 
     QLineEdit *m_name;

@@ -3,16 +3,30 @@
 
 #define NOMINMAX
 #include <algorithm>
+#include <QApplication>
 #include <QDebug>
 
 using namespace std;
 using namespace SlippyMap;
 
+SlippyMapLayerPolygon::SlippyMapLayerPolygon(QObject *parent) :
+    SlippyMapLayerObject(parent),
+    m_points({}),
+    m_fillColor(qApp->palette().base().color()),
+    m_strokeColor(qApp->palette().highlight().color()),
+    m_strokeWidth(1)
+{
+    initStyle();
+}
+
 SlippyMapLayerPolygon::SlippyMapLayerPolygon(QVector<QPointF> points, QObject *parent) :
     SlippyMapLayerObject(parent),
-    m_points(points)
+    m_points(points),
+    m_fillColor(qApp->palette().base().color()),
+    m_strokeColor(qApp->palette().highlight().color()),
+    m_strokeWidth(1)
 {
-
+    initStyle();
 }
 
 SlippyMapLayerPolygon::~SlippyMapLayerPolygon()
@@ -24,8 +38,8 @@ void SlippyMapLayerPolygon::draw(QPainter *painter, const QTransform &transform,
 {
     switch (state) {
     case NormalState:
-        painter->setPen(m_pen);
-        painter->setBrush(m_brush);
+        painter->setPen(m_strokePen);
+        painter->setBrush(m_fillBrush);
 
         painter->save();
         painter->setWorldTransform(transform);
@@ -60,9 +74,14 @@ void SlippyMapLayerPolygon::draw(QPainter *painter, const QTransform &transform,
     }
 }
 
-QVector<QPointF> SlippyMapLayerPolygon::points()
+QVector<QPointF> SlippyMapLayerPolygon::points() const
 {
     return m_points;
+}
+
+void SlippyMapLayerPolygon::setPoints(const QVector<QPointF> &points)
+{
+    m_points = points;
 }
 
 bool SlippyMapLayerPolygon::isIntersectedBy(const QRectF& rect) const
@@ -122,6 +141,15 @@ const QPointF SlippyMapLayerPolygon::position() const
     return QPointF(x, y);
 }
 
+void SlippyMapLayerPolygon::setPosition(const QPointF &position) {
+    QPointF curr = this->position();
+    QPointF diff = position - curr;
+    for (auto& point : m_points) {
+        point += diff;
+    }
+    emit updated();
+}
+
 const QSizeF SlippyMapLayerPolygon::size() const
 {
     QPointF pos = position();
@@ -150,6 +178,34 @@ const QSizeF SlippyMapLayerPolygon::size() const
     return QSizeF(width, height);
 }
 
+const QColor & SlippyMapLayerPolygon::strokeColor() const
+{
+    return m_strokeColor;
+}
+
+const QColor & SlippyMapLayerPolygon::fillColor() const
+{
+    return m_fillColor;
+}
+
+int SlippyMapLayerPolygon::strokeWidth() const
+{
+    return m_strokeWidth;
+}
+
+void SlippyMapLayerPolygon::initStyle()
+{
+    m_strokePen.setStyle(Qt::SolidLine);
+    m_strokePen.setCosmetic(true);
+    m_strokePen.setJoinStyle(Qt::MiterJoin);
+    m_strokePen.setCapStyle(Qt::SquareCap);
+    m_strokePen.setWidth(m_strokeWidth);
+    m_strokePen.setColor(m_strokeColor);
+
+    m_fillBrush.setStyle(Qt::SolidPattern);
+    m_fillBrush.setColor(m_fillColor);
+}
+
 bool SlippyMapLayerPolygon::test_point(const QPointF& a, const QPointF& b, const QPointF& p) const
 {
     const qreal epsilon = numeric_limits<qreal>().epsilon();
@@ -168,12 +224,62 @@ bool SlippyMapLayerPolygon::test_point(const QPointF& a, const QPointF& b, const
 
 QDataStream &SlippyMapLayerPolygon::serialize(QDataStream &stream) const
 {
+    stream << label();
+    stream << description();
+    stream << position();
+    stream << strokeColor();
+    stream << strokeWidth();
+    stream << fillColor();
+    stream << points();
     return stream;
 }
 
 void SlippyMapLayerPolygon::unserialize(QDataStream &stream)
 {
+    QString label;
+    QString description;
+    QPointF position;
+    QColor strokeColor;
+    int strokeWidth;
+    QColor fillColor;
+    QVector<QPointF> points;
 
+    stream >> label;
+    stream >> description;
+    stream >> position;
+    stream >> strokeColor;
+    stream >> strokeWidth;
+    stream >> fillColor;
+    stream >> points;
+
+    setLabel(label);
+    setDescription(description);
+    setPosition(position);
+    setStrokeColor(strokeColor);
+    setStrokeWidth(strokeWidth);
+    setFillColor(fillColor);
+    setPoints(points);
+}
+
+void SlippyMapLayerPolygon::setStrokeColor(const QColor &color)
+{
+    m_strokeColor = color;
+    initStyle();
+    emit updated();
+}
+
+void SlippyMapLayerPolygon::setStrokeWidth(int width)
+{
+    m_strokeWidth = width;
+    initStyle();
+    emit updated();
+}
+
+void SlippyMapLayerPolygon::setFillColor(const QColor &color)
+{
+    m_fillColor = color;
+    initStyle();
+    emit updated();
 }
 
 SlippyMapLayerObjectPropertyPage *SlippyMapLayerPolygon::propertyPage() const

@@ -45,6 +45,18 @@ void SlippyMapLayerMarkerPropertyPage::setupUi()
     setLayout(stylePropertiesLayout);
 }
 
+void SlippyMapLayerMarkerPropertyPage::updateUi()
+{
+    auto *marker = qobject_cast<SlippyMapWidgetMarker*>(m_object);
+
+    m_color->setText(marker->color().name(QColor::HexRgb));
+    m_radius->setText(QString("%1").arg(marker->radius()));
+
+    QColor markerColor = marker->color();
+    m_color->setText(markerColor.name(QColor::HexArgb));
+    m_radius->setText(QString("%1").arg(marker->radius()));
+}
+
 void SlippyMapLayerMarkerPropertyPage::save()
 {
     auto *obj = qobject_cast<SlippyMapWidgetMarker*>(m_object);

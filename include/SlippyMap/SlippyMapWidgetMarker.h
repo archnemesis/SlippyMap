@@ -39,7 +39,7 @@ namespace SlippyMap
         bool isIntersectedBy(const QRectF &rect) const;
         const QString statusBarText() const;
 
-        void setPosition(const QPointF& position);
+        void setPosition(const QPointF& position) override;
         void setColor(const QColor& color);
         void setRadius(int radius);
         void setIcon(const QImage& icon);
