@@ -1,4 +1,5 @@
 #include "SlippyMap/SlippyMapWidgetMarker.h"
+#include "SlippyMap/SlippyMapLayerMarkerPropertyPage.h"
 
 #include <QPainter>
 #include <QPoint>
@@ -7,6 +8,7 @@
 #include <QColor>
 #include <QFontMetrics>
 #include <QPalette>
+
 #include <QGuiApplication>
 
 #include <math.h>
@@ -15,8 +17,8 @@ using namespace SlippyMap;
 
 SlippyMapWidgetMarker::SlippyMapWidgetMarker(QObject *parent) :
         SlippyMapLayerObject (parent),
-        m_color(Qt::white),
-        m_radius(5)
+        m_color(qApp->palette().highlight().color()),
+        m_radius(10)
 {
     initStyle();
 }
@@ -27,43 +29,43 @@ SlippyMapWidgetMarker::SlippyMapWidgetMarker(const QPointF &position, QObject *p
     m_position = position;
 }
 
-// QDataStream &operator<<(QDataStream &stream, const SlippyMapLayerMarker &marker)
-// {
-//     stream << marker.label();
-//     stream << marker.description();
-//     stream << marker.position();
-//     stream << marker.radius();
-//     stream << marker.color();
-//     stream << marker.icon();
-//
-//     return stream;
-// }
-//
-// QDataStream &operator>>(QDataStream &stream, SlippyMapLayerMarker &marker)
-// {
-//     QString label;
-//     QString description;
-//     QPointF position;
-//     int radius;
-//     QColor color;
-//     QImage icon;
-//
-//     stream >> label;
-//     stream >> description;
-//     stream >> position;
-//     stream >> radius;
-//     stream >> color;
-//     stream >> icon;
-//
-//     marker.setLabel(label);
-//     marker.setDescription(description);
-//     marker.setPosition(position);
-//     marker.setRadius(radius);
-//     marker.setColor(color);
-//     marker.setIcon(icon);
-//
-//     return stream;
-// }
+ QDataStream &operator<<(QDataStream &stream, const SlippyMapWidgetMarker marker)
+ {
+     stream << marker.label();
+     stream << marker.description();
+     stream << marker.position();
+     stream << marker.radius();
+     stream << marker.color();
+     stream << marker.icon();
+
+     return stream;
+ }
+
+ QDataStream &operator>>(QDataStream &stream, SlippyMapWidgetMarker &marker)
+ {
+     QString label;
+     QString description;
+     QPointF position;
+     int radius;
+     QColor color;
+     QImage icon;
+
+     stream >> label;
+     stream >> description;
+     stream >> position;
+     stream >> radius;
+     stream >> color;
+     stream >> icon;
+
+     marker.setLabel(label);
+     marker.setDescription(description);
+     marker.setPosition(position);
+     marker.setRadius(radius);
+     marker.setColor(color);
+     marker.setIcon(icon);
+
+     return stream;
+ }
 
 void SlippyMapWidgetMarker::draw(QPainter *painter, const QTransform &transform, ObjectState state)
 {
@@ -104,7 +106,7 @@ void SlippyMapWidgetMarker::draw(QPainter *painter, const QTransform &transform,
         if (isActive()) {
             painter->setBrush(m_activeDotBrush);
             painter->setPen(m_activeDotPen);
-            painter->drawEllipse(pos, m_radius + 2, m_radius + 2);
+            painter->drawEllipse(pos, m_radius + 5, m_radius + 5);
         }
 
         painter->setBrush(m_dotBrush);
@@ -117,7 +119,7 @@ void SlippyMapWidgetMarker::draw(QPainter *painter, const QTransform &transform,
             qint32 label_w = metrics.horizontalAdvance(m_label);
             qint32 label_h = metrics.height();
             qint32 label_x = static_cast<qint32>(pos.x()) - (label_w / 2);
-            qint32 label_y = static_cast<qint32>(pos.y()) - (label_h + 15);
+            qint32 label_y = static_cast<qint32>(pos.y()) - (label_h + m_radius + 15);
             painter->setBrush(m_labelBrush);
             painter->setPen(m_labelPen);
             painter->drawRoundedRect(
@@ -167,6 +169,7 @@ void SlippyMapWidgetMarker::setPosition(const QPointF &position)
 void SlippyMapWidgetMarker::setColor(const QColor &color)
 {
     m_color = color;
+    initStyle();
 }
 
 void SlippyMapWidgetMarker::setRadius(int radius)
@@ -174,20 +177,10 @@ void SlippyMapWidgetMarker::setRadius(int radius)
     m_radius = radius;
 }
 
-void SlippyMapWidgetMarker::setEditable(bool editable)
-{
-    m_editable = editable;
-}
-
 void SlippyMapWidgetMarker::setIcon(const QImage &icon)
 {
     m_icon = icon;
     m_pixmap = QPixmap::fromImage(m_icon);
-}
-
-bool SlippyMapWidgetMarker::isEditable() const
-{
-    return m_editable;
 }
 
 const QPointF SlippyMapWidgetMarker::position() const
@@ -220,12 +213,12 @@ void SlippyMapWidgetMarker::initStyle()
     QPalette systemPalette = QGuiApplication::palette();
 
     m_dotBrush.setStyle(Qt::SolidPattern);
-    m_dotBrush.setColor(systemPalette.highlight().color());
+    m_dotBrush.setColor(m_color);
     m_dotPen.setStyle(Qt::NoPen);
 
     m_activeDotBrush.setStyle(Qt::NoBrush);
-    m_activeDotPen.setColor(systemPalette.highlight().color());
-    m_activeDotPen.setWidth(2);
+    m_activeDotPen.setColor(m_color);
+    m_activeDotPen.setWidth(3);
 
     m_labelBrush.setStyle(Qt::SolidPattern);
     m_labelBrush.setColor(systemPalette.window().color());
@@ -235,4 +228,54 @@ void SlippyMapWidgetMarker::initStyle()
     m_labelTextBrush.setStyle(Qt::NoBrush);
     m_labelTextPen.setStyle(Qt::SolidLine);
     m_labelTextPen.setColor(systemPalette.text().color());
+}
+
+QDataStream& SlippyMapWidgetMarker::serialize(QDataStream& stream) const
+{
+    stream << label();
+    stream << description();
+    stream << position();
+    stream << radius();
+    stream << color();
+    stream << icon();
+    return stream;
+}
+
+void SlippyMapWidgetMarker::unserialize(QDataStream& stream)
+{
+    QString label;
+    QString description;
+    QPointF position;
+    int radius;
+    QColor color;
+    QImage icon;
+
+    stream >> label;
+    stream >> description;
+    stream >> position;
+    stream >> radius;
+    stream >> color;
+    stream >> icon;
+
+    setLabel(label);
+    setDescription(description);
+    setPosition(position);
+    setRadius(radius);
+    setColor(color);
+    setIcon(icon);
+}
+
+SlippyMapWidgetMarker::SlippyMapWidgetMarker(const SlippyMapWidgetMarker &other)
+{
+    setLabel(other.label());
+    setDescription(other.description());
+    setPosition(other.position());
+    setRadius(other.radius());
+    setColor(other.color());
+    setIcon(other.icon());
+}
+
+SlippyMapLayerObjectPropertyPage *SlippyMapWidgetMarker::propertyPage() const
+{
+    return new SlippyMapLayerMarkerPropertyPage((SlippyMapLayerObject *) this);
 }

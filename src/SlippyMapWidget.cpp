@@ -63,51 +63,13 @@ SlippyMapWidget::SlippyMapWidget(QWidget *parent)
     , m_dragButton(Qt::NoButton)
 {
     setMouseTracking(true);
+    setCursor(Qt::OpenHandCursor);
 
     m_net = new QNetworkAccessManager(this);
     m_zoomLevel = DEFAULT_ZOOM;
     m_clipboard = QApplication::clipboard();
     m_lat = DEFAULT_LATITUDE;
     m_lon = DEFAULT_LONGITUDE;
-
-    m_zoomInButton = new QPushButton(this);
-    m_zoomInButton->setText("");
-    m_zoomInButton->setIcon(QIcon(":/icons/resources/light/plus-64.png"));
-    m_zoomInButton->setIconSize(QSize(64,64));
-
-    m_zoomOutButton = new QPushButton(this);
-    m_zoomOutButton->setText("");
-    m_zoomOutButton->setIcon(QIcon(":/icons/resources/light/minus-64.png"));
-    m_zoomOutButton->setIconSize(QSize(64,64));
-
-    m_currentLocationButton = new QPushButton(this);
-    m_currentLocationButton->setText("");
-    m_currentLocationButton->setIcon(QIcon(":/icons/resources/light/location-64.png"));
-    m_currentLocationButton->setIconSize(QSize(64, 64));
-
-    auto *vLayout = new QVBoxLayout();
-    vLayout->addWidget(m_zoomInButton);
-    vLayout->addWidget(m_zoomOutButton);
-    vLayout->addWidget(m_currentLocationButton);
-    vLayout->addStretch();
-
-    auto *hLayout = new QHBoxLayout();
-    hLayout->addLayout(vLayout);
-    hLayout->addStretch();
-
-    connect(m_zoomInButton,
-            &QPushButton::pressed,
-            this,
-            &SlippyMapWidget::increaseZoomLevel);
-    connect(m_zoomOutButton,
-            &QPushButton::pressed,
-            this,
-            &SlippyMapWidget::decreaseZoomLevel);
-    connect(m_currentLocationButton,
-            &QPushButton::clicked,
-            [this]() {
-                emit currentLocationButtonClicked();
-    });
 
     m_scaleBrush.setStyle(Qt::SolidPattern);
     m_scaleBrush.setColor(QColor(0,0,0,128));
@@ -125,8 +87,6 @@ SlippyMapWidget::SlippyMapWidget(QWidget *parent)
     m_drawBrush.setColor(QColor(255, 255, 255, 128));
     m_drawPen.setStyle(Qt::SolidLine);
     m_drawPen.setColor(Qt::white);
-
-    setLayout(hLayout);
 }
 
 SlippyMapWidget::~SlippyMapWidget()
@@ -221,26 +181,6 @@ bool SlippyMapWidget::centerOnCursorWhileZooming() const
     return m_centerOnCursorWhileZooming;
 }
 
-void SlippyMapWidget::setZoomButtonsVisible(bool visible)
-{
-    m_zoomButtonsVisible = visible;
-    m_zoomInButton->setVisible(false);
-    m_zoomOutButton->setVisible(false);
-    update();
-}
-
-void SlippyMapWidget::setLocationButtonVisible(bool visible)
-{
-    m_locationButtonVisible = visible;
-    m_currentLocationButton->setVisible(visible);
-    update();
-}
-
-void SlippyMapWidget::setZoomSliderVisible(bool visible)
-{
-    m_zoomSliderVisible = visible;
-    update();
-}
 
 void SlippyMapWidget::setTileCachingEnabled(bool enabled)
 {
@@ -627,6 +567,7 @@ void SlippyMapWidget::mousePressEvent(QMouseEvent *event)
 
     if (event->button() == Qt::LeftButton) {
         if (m_drawMode == NoDrawing) {
+            setCursor(Qt::ClosedHandCursor);
         }
         else {
             switch (m_drawMode) {
@@ -645,6 +586,7 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     m_dragging = false;
 
+    // this is a click on a single point (no drag happened)
     if (event->button() == Qt::LeftButton && event->pos() == m_dragRealStart) {
         if (m_drawMode == NoDrawing) {
             QPointF geoPos = widgetCoordsToGeoCoords(event->pos());
@@ -673,6 +615,7 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
                             emit objectDeactivated(m_activeObject);
                             m_activeObject = nullptr;
                             update();
+                            setCursor(Qt::OpenHandCursor);
                             return;
                         }
                     }
@@ -681,6 +624,7 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
 
             m_activeObject = nullptr;
             update();
+            setCursor(Qt::OpenHandCursor);
             return;
         }
         else {
@@ -689,6 +633,7 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
             update();
         }
     }
+    // user released mouse button while drawing
     else if (event->button() == Qt::LeftButton && m_drawMode != NoDrawing) {
         switch (m_drawMode) {
             case RectDrawing:
@@ -702,24 +647,26 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
         }
 
         m_drawMode = NoDrawing;
-        setCursor(Qt::ArrowCursor);
+        setCursor(Qt::OpenHandCursor);
         emit drawModeChanged(NoDrawing);
         update();
     }
+    // user released mouse button after dragging the map
     else {
         qDebug() << "Mouse button release!";
+        setCursor(Qt::OpenHandCursor);
         emit dragFinished();
     }
 }
 
 void SlippyMapWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    if (m_drawMode == NoDrawing) {
+    if (m_drawMode == NoDrawing && !m_dragging) {
         QPoint mousePos = event->pos();
         double mouseLat = widgetY2lat(mousePos.y());
         double mouseLon = widgetX2long(mousePos.x());
         QPointF mouseCoords = QPointF(mouseLon, mouseLat);
-        Qt::CursorShape cursorShape = Qt::ArrowCursor;
+        Qt::CursorShape cursorShape = Qt::OpenHandCursor;
 
         for (auto *layer : m_layerManager->layers()) {
             if (layer->isVisible()) {
@@ -834,7 +781,7 @@ void SlippyMapWidget::contextMenuEvent(QContextMenuEvent *event)
 //    m_contextMenuLocation = event->pos();
 //    m_addMarkerAction->setVisible(true);
 //    m_deleteMarkerAction->setVisible(false);
-//    m_setMarkerLabelAction->setVisible(false);
+//    m_markerPropertiesAction->setVisible(false);
 //    m_activeMarker = nullptr;
 
 //    if (m_markerModel != nullptr) {
@@ -849,7 +796,7 @@ void SlippyMapWidget::contextMenuEvent(QContextMenuEvent *event)
 //                        10, 10);
 //            if (marker_box.contains(event->pos())) {
 //                m_addMarkerAction->setVisible(false);
-//                m_setMarkerLabelAction->setVisible(true);
+//                m_markerPropertiesAction->setVisible(true);
 //                m_deleteMarkerAction->setVisible(true);
 //                m_activeMarker = marker;
 //                break;
@@ -863,7 +810,7 @@ void SlippyMapWidget::contextMenuEvent(QContextMenuEvent *event)
 //        if (event->x() > (marker_x - 5) && event->x() < (marker_x + 5)) {
 //            if (event->y() > (marker_y - 5) && event->y() < (marker_y + 5)) {
 //                m_addMarkerAction->setVisible(false);
-//                m_setMarkerLabelAction->setVisible(true);
+//                m_markerPropertiesAction->setVisible(true);
 //                m_deleteMarkerAction->setVisible(true);
 //                m_activeMarker = marker;
 //                break;

@@ -34,6 +34,7 @@ namespace SlippyMap
         void setDefaultLayer(SlippyMapLayer *layer);
         void saveToFile(QString fileName);
 
+        int objectCount() const;
         bool contains(SlippyMapLayerObject *object);
         bool containsLayer(SlippyMapLayer *layer);
 

@@ -23,6 +23,9 @@ namespace SlippyMap {
         bool contains(const QPointF& point, int zoom) const override;
         const QPointF position() const override;
         const QSizeF size() const override;
+        SlippyMapLayerObjectPropertyPage* propertyPage() const;
+        QDataStream& serialize(QDataStream& stream) const override;
+        void unserialize(QDataStream& stream) override;
 
     protected:
         QVector<QPointF> m_points;

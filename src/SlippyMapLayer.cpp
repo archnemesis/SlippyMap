@@ -105,6 +105,16 @@ void SlippyMapLayer::objectChanged()
     emit objectUpdated(qobject_cast<SlippyMapLayerObject*>(sender()));
 }
 
+void SlippyMapLayer::setEditable(const bool editable)
+{
+    m_editable = editable;
+}
+
+bool SlippyMapLayer::isEditable()
+{
+    return m_editable;
+}
+
 QDataStream &operator<<(QDataStream &stream, const SlippyMapLayer *layer)
 {
     stream << layer->name();

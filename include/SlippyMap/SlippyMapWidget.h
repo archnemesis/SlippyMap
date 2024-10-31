@@ -24,11 +24,9 @@ class QWheelEvent;
 class QContextMenuEvent;
 class QPushButton;
 class QLineEdit;
-class QCompleter;
 class QMenu;
 class QAction;
 class QClipboard;
-class QListWidget;
 
 namespace SlippyMap
 {
@@ -88,24 +86,21 @@ namespace SlippyMap
         void setLayerManager(SlippyMapLayerManager *manager);
         void setLegendAlignment(const Qt::Alignment& alignment);
         void setLegendSpacing(int legendSpacing);
-        void setLocationButtonVisible(bool visible);
         void setTileCacheDir(QString dir);
         void setTileCachingEnabled(bool enabled);
         void setUserAgent(const QString& userAgent);
-        void setZoomButtonsVisible(bool visible);
-        void setZoomSliderVisible(bool visible);
         void takeLayer(SlippyMapWidgetLayer *layer);
 
-        public slots:
-            void decreaseZoomLevel();
+    public slots:
+        void decreaseZoomLevel();
         void increaseZoomLevel();
         void setCenter(QPointF position);
         void setCenter(double latitude, double longitude);
         void setTextLocation(const QString& location);
         void setZoomLevel(int zoom);
 
-        protected slots:
-            void centerMapActionTriggered();
+    protected slots:
+        void centerMapActionTriggered();
         void copyCoordinatesActionTriggered();
         void copyLatitudeActionTriggered();
         void copyLongitudeActionTriggered();
@@ -213,9 +208,6 @@ namespace SlippyMap
         QPoint m_contextMenuLocation;
         QPoint m_dragRealStart;
         QPoint m_dragStart;
-        QPushButton *m_currentLocationButton;
-        QPushButton *m_zoomInButton;
-        QPushButton *m_zoomOutButton;
         QRegularExpression m_locationParser;
         QSize m_legendMargins;
         Qt::Alignment m_legendAlignment;

@@ -322,3 +322,12 @@ void SlippyMapLayerManager::layer_onObjectUpdated(SlippyMapLayerObject *object)
     QModelIndex end = index(m_layers.at(r)->indexOf(object), 0, index(r, 0));
     emit dataChanged(begin, end);
 }
+
+int SlippyMapLayerManager::objectCount() const
+{
+    int count = 0;
+    for (auto *layer : m_layers) {
+        count += layer->objects().count();
+    }
+    return count;
+}

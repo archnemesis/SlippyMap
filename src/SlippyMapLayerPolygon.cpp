@@ -1,4 +1,5 @@
 #include "SlippyMap/SlippyMapLayerPolygon.h"
+#include "SlippyMap/SlippyMapLayerPolygonPropertyPage.h"
 
 #define NOMINMAX
 #include <algorithm>
@@ -163,4 +164,19 @@ bool SlippyMapLayerPolygon::test_point(const QPointF& a, const QPointF& b, const
     double blue = abs(a.x() - p.x()) > MIN ? (p.y() - a.y()) / (p.x() - a.x()) : MAX;
     double red  = abs(a.x() - b.x()) > MIN ? (b.y() - a.y()) / (b.x() - a.x()) : MAX;
     return blue >= red;
+}
+
+QDataStream &SlippyMapLayerPolygon::serialize(QDataStream &stream) const
+{
+    return stream;
+}
+
+void SlippyMapLayerPolygon::unserialize(QDataStream &stream)
+{
+
+}
+
+SlippyMapLayerObjectPropertyPage *SlippyMapLayerPolygon::propertyPage() const
+{
+    return new SlippyMapLayerPolygonPropertyPage((SlippyMapLayerObject *) this);
 }

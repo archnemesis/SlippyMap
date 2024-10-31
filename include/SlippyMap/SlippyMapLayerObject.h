@@ -9,6 +9,8 @@
 #include <QPainter>
 #include <QBrush>
 
+class SlippyMapLayerObjectPropertyPage;
+
 namespace SlippyMap
 {
     class SLIPPYMAPSHARED_EXPORT SlippyMapLayerObject : public QObject
@@ -27,17 +29,22 @@ namespace SlippyMap
         void setActive(bool active);
         void setBrush(QBrush brush);
         void setPen(QPen pen);
+        virtual SlippyMapLayerObjectPropertyPage* propertyPage() const = 0;
+        virtual QDataStream& serialize(QDataStream& stream) const = 0;
+        virtual void unserialize(QDataStream& stream) = 0;
         virtual bool contains(const QPointF& point, int zoom) const = 0;
         virtual bool isIntersectedBy(const QRectF& rect) const = 0;
         virtual bool isMovable();
+        virtual bool isEditable();
         virtual const QPointF position() const = 0;
         virtual const QSizeF size() const = 0;
         virtual QString statusBarText();
-        QString label();
-        QString description();
+        QString label() const;
+        QString description() const;
         void setLabel(const QString& name);
         void setDescription(const QString& description);
         void setVisible(bool visible);
+        void setEditable(bool editable);
         bool isVisible();
         bool isActive();
 
@@ -97,6 +104,7 @@ namespace SlippyMap
         bool m_active = false;
         bool m_visible = true;
         bool m_movable = true;
+        bool m_editable = true;
         void drawResizeHandle(QPainter *painter, QPoint point) const;
     };
 }

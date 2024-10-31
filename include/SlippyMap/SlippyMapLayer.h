@@ -22,9 +22,11 @@ namespace SlippyMap
         QString name() const;
         QString description() const;
         bool isVisible();
+        bool isEditable();
         void setName(const QString &name);
         void setDescription(const QString &description);
         void setVisible(const bool visible);
+        void setEditable(const bool editable);
         bool contains(SlippyMapLayerObject *object);
         int indexOf(SlippyMapLayerObject *object);
         void deactivateAll();
@@ -43,6 +45,7 @@ namespace SlippyMap
     protected:
         int m_zOrder = 0;
         bool m_visible = true;
+        bool m_editable = true;
         QString m_name;
         QString m_description;
         QList<SlippyMapLayerObject*> m_objects;

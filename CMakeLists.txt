@@ -30,6 +30,10 @@ add_library(SlippyMap
         include/SlippyMap/SlippyMapWidget.h
         include/SlippyMap/SlippyMapWidgetLayer.h
         include/SlippyMap/SlippyMapLayerPolygon.h
+        include/SlippyMap/SlippyMapLayerMarkerPropertyPage.h
+        include/SlippyMap/SlippyMapLayerObjectPropertyPage.h
+        include/SlippyMap/SlippyMapLayerPolygonPropertyPage.h
+        ../explorer/Map/SlippyMapLayerTrackPropertyPage.h
         src/SlippyMap.cpp
         src/SlippyMapLayer.cpp
         src/SlippyMapLayerManager.cpp
@@ -38,6 +42,10 @@ add_library(SlippyMap
         src/SlippyMapWidget.cpp
         src/SlippyMapWidgetLayer.cpp
         src/SlippyMapLayerPolygon.cpp
+        src/SlippyMapLayerMarkerPropertyPage.cpp
+        src/SlippyMapLayerObjectPropertyPage.cpp
+        src/SlippyMapLayerPolygonPropertyPage.cpp
+        ../explorer/Map/SlippyMapLayerTrackPropertyPage.cpp
 )
 
 target_include_directories(SlippyMap PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

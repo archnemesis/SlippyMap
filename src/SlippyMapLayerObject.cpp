@@ -50,12 +50,12 @@ void SlippyMapLayerObject::setActive(bool active)
     emit activeChanged();
 }
 
-QString SlippyMapLayerObject::label()
+QString SlippyMapLayerObject::label() const
 {
     return m_label;
 }
 
-QString SlippyMapLayerObject::description()
+QString SlippyMapLayerObject::description() const
 {
     return m_description;
 }
@@ -116,6 +116,16 @@ void SlippyMapLayerObject::drawResizeHandle(QPainter *painter, QPoint point) con
                 (point.y() - (m_resizeHandleWidth / 2)),
                 m_resizeHandleWidth,
                 m_resizeHandleWidth);
+}
+
+bool SlippyMapLayerObject::isEditable()
+{
+    return m_editable;
+}
+
+void SlippyMapLayerObject::setEditable(bool editable)
+{
+    m_editable = editable;
 }
 
 
