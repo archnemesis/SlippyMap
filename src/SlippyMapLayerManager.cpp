@@ -227,6 +227,9 @@ void SlippyMapLayerManager::takeLayer(SlippyMapLayer *layer)
     Q_CHECK_PTR(layer);
     Q_ASSERT(m_layers.contains(layer));
 
+    if (m_activeLayer == layer)
+        m_activeLayer = nullptr;
+
     m_layers.removeOne(layer);
 }
 
