@@ -495,7 +495,7 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
 
     /* ----- Dragging and Drawing ----- */
 
-    if (m_drawMode != NoDrawing) {
+    if (m_drawMode != NoDrawing && (m_dragStarted || m_drawMode == PolygonDrawing)) {
         switch (m_drawMode) {
             case RectDrawing:
                 painter.setBrush(m_drawBrush);
@@ -619,6 +619,7 @@ void SlippyMapWidget::mousePressEvent(QMouseEvent *event)
 {
     setFocus(Qt::MouseFocusReason);
     m_dragging = true;
+    m_dragStarted = false;
     m_dragStart = event->pos();
     m_dragRealStart = event->pos();
     m_dragButton = event->button();
@@ -657,6 +658,7 @@ void SlippyMapWidget::mousePressEvent(QMouseEvent *event)
                 case RectDrawing:
                 case EllipseDrawing:
                     m_drawModeRect_topLeft = m_dragStart;
+                    m_dragStarted = true;
                     break;
                 case PolygonDrawing:
                     qDebug() << "Beginning polygon draw...";
@@ -740,6 +742,13 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
         }
 
         m_drawMode = NoDrawing;
+        m_dragging = false;
+        m_dragStarted = false;
+        m_dragObject = nullptr;
+        m_drawModeRect_topLeft.setX(0);
+        m_drawModeRect_topLeft.setY(0);
+        m_drawModeRect_bottomRight.setX(0);
+        m_drawModeRect_bottomRight.setY(0);
         setCursor(Qt::OpenHandCursor);
         emit drawModeChanged(NoDrawing);
         update();
@@ -873,50 +882,18 @@ void SlippyMapWidget::resizeEvent(QResizeEvent *event)
 void SlippyMapWidget::contextMenuEvent(QContextMenuEvent *event)
 {
     emit contextMenuRequested(event->pos());
-//    m_coordAction->setText(latLonToString(widgetY2lat(event->y()), widgetX2long(event->x())));
-//    m_contextMenuLocation = event->pos();
-//    m_addMarkerAction->setVisible(true);
-//    m_deleteObjectAction->setVisible(false);
-//    m_objectPropertiesAction->setVisible(false);
-//    m_activeMarker = nullptr;
+}
 
-//    if (m_markerModel != nullptr) {
-//        QList<SlippyMapWidgetMarker *> markers = m_markerModel->markersForRect(boundingBoxLatLon());
-
-//        for (SlippyMapWidgetMarker *marker : markers) {
-//            qint32 marker_x = long2widgetX(marker->longitude());
-//            qint32 marker_y = lat2widgety(marker->latitude());
-//            QRect marker_box(
-//                        (marker_x - 5),
-//                        (marker_y - 5),
-//                        10, 10);
-//            if (marker_box.contains(event->pos())) {
-//                m_addMarkerAction->setVisible(false);
-//                m_objectPropertiesAction->setVisible(true);
-//                m_deleteObjectAction->setVisible(true);
-//                m_activeMarker = marker;
-//                break;
-//            }
-//        }
-//    }
-
-//    for (SlippyMapWidgetMarker *marker : m_markers) {
-//        qint32 marker_x = long2widgetX(marker->longitude());
-//        qint32 marker_y = lat2widgety(marker->latitude());
-//        if (event->x() > (marker_x - 5) && event->x() < (marker_x + 5)) {
-//            if (event->y() > (marker_y - 5) && event->y() < (marker_y + 5)) {
-//                m_addMarkerAction->setVisible(false);
-//                m_objectPropertiesAction->setVisible(true);
-//                m_deleteObjectAction->setVisible(true);
-//                m_activeMarker = marker;
-//                break;
-//            }
-//        }
-//    }
-
-//    update();
-//    emit contextMenuActivated(widgetY2lat(event->y()), widgetX2long(event->x()));
-//    m_contextMenu->exec(event->globalPos());
+void SlippyMapWidget::keyPressEvent(QKeyEvent *event)
+{
+    if (m_drawMode == PolygonDrawing) {
+        if (event->key() == Qt::Key_Escape) {
+            m_drawMode = NoDrawing;
+            emit drawModeChanged(NoDrawing);
+            event->accept();
+            update();
+        }
+    }
 }
 
 /**

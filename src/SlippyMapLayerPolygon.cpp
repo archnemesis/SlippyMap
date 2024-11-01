@@ -282,7 +282,7 @@ void SlippyMapLayerPolygon::setFillColor(const QColor &color)
     emit updated();
 }
 
-SlippyMapLayerObjectPropertyPage *SlippyMapLayerPolygon::propertyPage() const
+QList<SlippyMapLayerObjectPropertyPage*> SlippyMapLayerPolygon::propertyPages() const
 {
-    return new SlippyMapLayerPolygonPropertyPage((SlippyMapLayerObject *) this);
+    return {new SlippyMapLayerPolygonPropertyPage((SlippyMapLayerObject *) this)};
 }

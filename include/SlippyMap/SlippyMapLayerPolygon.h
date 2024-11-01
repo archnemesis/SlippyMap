@@ -22,7 +22,7 @@ namespace SlippyMap {
         QVector<QPointF> points() const;
         void setPoints(const QVector<QPointF> &points);
         QDataStream& serialize(QDataStream& stream) const override;
-        SlippyMapLayerObjectPropertyPage* propertyPage() const;
+        QList<SlippyMapLayerObjectPropertyPage*> propertyPages() const;
         bool contains(const QPointF& point, int zoom) const override;
         bool isIntersectedBy(const QRectF& rect) const override;
         const QPointF position() const override;

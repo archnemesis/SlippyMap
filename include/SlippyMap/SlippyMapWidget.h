@@ -127,6 +127,7 @@ namespace SlippyMap
         void wheelEvent(QWheelEvent *event) override;
         void resizeEvent(QResizeEvent *event) override;
         void contextMenuEvent(QContextMenuEvent *event) override;
+        void keyPressEvent(QKeyEvent *event) override;
         QPixmap drawLegend(SlippyMapWidgetLayer *layer, int width, int height);
 
     signals:
@@ -224,6 +225,7 @@ namespace SlippyMap
         Qt::Alignment m_legendAlignment;
         Qt::MouseButton m_dragButton;
         bool m_dragging = false;
+        bool m_dragStarted = false;
         double m_lat;
         double m_lon;
         int m_drawingStrokeWidth = 2;

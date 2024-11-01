@@ -29,7 +29,7 @@ namespace SlippyMap
         void setActive(bool active);
         void setBrush(QBrush brush);
         void setPen(QPen pen);
-        virtual SlippyMapLayerObjectPropertyPage* propertyPage() const = 0;
+        virtual QList<SlippyMapLayerObjectPropertyPage*> propertyPages() const = 0;
         virtual QDataStream& serialize(QDataStream& stream) const = 0;
         virtual void unserialize(QDataStream& stream) = 0;
         virtual bool contains(const QPointF& point, int zoom) const = 0;

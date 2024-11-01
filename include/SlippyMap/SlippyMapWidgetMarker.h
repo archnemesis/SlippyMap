@@ -48,7 +48,7 @@ namespace SlippyMap
         const QColor& color() const;
         const QImage& icon() const;
         int radius() const;
-        SlippyMapLayerObjectPropertyPage* propertyPage() const;
+        QList<SlippyMapLayerObjectPropertyPage*> propertyPages() const;
         QDataStream& serialize(QDataStream& stream) const override;
         void unserialize(QDataStream& stream) override;
 

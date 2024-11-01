@@ -279,7 +279,7 @@ SlippyMapWidgetMarker::SlippyMapWidgetMarker(const SlippyMapWidgetMarker &other)
     setIcon(other.icon());
 }
 
-SlippyMapLayerObjectPropertyPage *SlippyMapWidgetMarker::propertyPage() const
+QList<SlippyMapLayerObjectPropertyPage*> SlippyMapWidgetMarker::propertyPages() const
 {
-    return new SlippyMapLayerMarkerPropertyPage((SlippyMapLayerObject *) this);
+    return {new SlippyMapLayerMarkerPropertyPage((SlippyMapLayerObject *) this)};
 }
