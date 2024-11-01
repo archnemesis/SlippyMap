@@ -1,4 +1,5 @@
 #include <SlippyMap/SlippyMapLayerPolygonPropertyPage.h>
+#include <SlippyMap/SlippyMap.h>
 
 #include <QDebug>
 #include <QApplication>
@@ -7,6 +8,7 @@
 #include <QVBoxLayout>
 #include <QFormLayout>
 #include <QPointF>
+#include <QListWidget>
 
 SlippyMapLayerPolygonPropertyPage::SlippyMapLayerPolygonPropertyPage(SlippyMapLayerObject *object):
     SlippyMapLayerObjectPropertyPage(object),
@@ -38,9 +40,15 @@ void SlippyMapLayerPolygonPropertyPage::setupUi()
     formLayout->addRow(tr("Stroke Color"), m_strokeColor);
     formLayout->addRow(tr("Fill Color"), m_fillColor);
 
+    m_pointList = new QListWidget();
+    for (const auto& point : m_polygon->points()) {
+        QString label = latLonToString(point);
+        m_pointList->addItem(label);
+    }
+
     auto *vLayout = new QVBoxLayout();
     vLayout->addLayout(formLayout);
-    vLayout->addStretch();
+    vLayout->addWidget(m_pointList);
 
     setLayout(vLayout);
 }

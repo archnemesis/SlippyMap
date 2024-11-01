@@ -7,6 +7,7 @@
 using namespace SlippyMap;
 
 class QLineEdit;
+class QListWidget;
 
 class SlippyMapLayerPolygonPropertyPage : public SlippyMapLayerObjectPropertyPage
 {
@@ -25,6 +26,7 @@ protected:
     QLineEdit *m_strokeColor;
     QLineEdit *m_strokeWidth;
     QLineEdit *m_fillColor;
+    QListWidget *m_pointList;
 };
 
 #endif // SLIPPYMAPPOLYGONPROPERTYPAGE_H

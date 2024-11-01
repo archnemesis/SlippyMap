@@ -11,6 +11,7 @@ namespace SlippyMap
 {
     class SlippyMapLayer;
     class SlippyMapLayerObject;
+    class SlippyMapAnimatedLayer;
 
     class SLIPPYMAPSHARED_EXPORT SlippyMapLayerManager : public QAbstractItemModel
     {
@@ -29,9 +30,12 @@ namespace SlippyMap
         void addLayerObject(SlippyMapLayer *layer, SlippyMapLayerObject *object);
         void addLayerObject(SlippyMapLayerObject *object);
         void removeLayerObject(SlippyMapLayer *layer, SlippyMapLayerObject *object);
+        void removeLayerObjects(SlippyMapLayer *layer);
         void takeLayer(SlippyMapLayer *layer);
         void setActiveLayer(SlippyMapLayer *layer);
         void setDefaultLayer(SlippyMapLayer *layer);
+        void deactivateActiveObject();
+        void updateActiveLayer();
         void saveToFile(QString fileName);
 
         int objectCount() const;
@@ -51,6 +55,7 @@ namespace SlippyMap
         void layerObjectRemoved(SlippyMapLayer *layer, SlippyMapLayerObject *object);
     protected:
         QList<SlippyMapLayer*> m_layers;
+        QList<SlippyMapAnimatedLayer*> m_animatedLayers;
         SlippyMapLayer *m_activeLayer = nullptr;
         SlippyMapLayer *m_defaultLayer = nullptr;
         QFont m_hiddenFont;

@@ -75,6 +75,7 @@ namespace SlippyMap
         double widgetY2lat(qint32 y);
         double latitude() const;
         double longitude() const;
+        QPointF position() const;
         int zoomLevel() const;
         qint32 lat2widgety(double lat);
         qint32 long2widgetX(double lon);
@@ -93,6 +94,7 @@ namespace SlippyMap
         void setDrawingFillColor(const QColor& color);
         void setUserAgent(const QString& userAgent);
         void takeLayer(SlippyMapWidgetLayer *layer);
+        void setActiveObject(SlippyMapLayerObject *object);
 
     public slots:
         void decreaseZoomLevel();
@@ -101,6 +103,8 @@ namespace SlippyMap
         void setCenter(double latitude, double longitude);
         void setTextLocation(const QString& location);
         void setZoomLevel(int zoom);
+        void nextFrame();
+        void previousFrame();
 
     protected slots:
         void centerMapActionTriggered();
@@ -138,7 +142,7 @@ namespace SlippyMap
         void searchTextChanged(const QString &searchText);
         void rectSelected(const QRect &rect);
         void ellipseSelected(const QRect &rect);
-        void polygonSelected(const QVector<QPoint> &points);
+        void polygonSelected(const QList<QPointF>& points);
         void drawModeChanged(DrawMode mode);
         void objectActivated(SlippyMapLayerObject *object);
         void objectDeactivated(SlippyMapLayerObject *object);
@@ -198,6 +202,7 @@ namespace SlippyMap
         QColor m_drawingFillColor;
         QFont m_scaleTextFont;
         QList<LineSet*> m_lineSets;
+        QList<QPointF> m_drawPolygonPoints;
         QList<SlippyMapWidgetLayer*> m_expiredLayers;
         QList<SlippyMapWidgetLayer*> m_layers;
         QMap<LineSet*,QVector<QLineF>> m_lineSetPaths;
@@ -213,6 +218,7 @@ namespace SlippyMap
         QPoint m_contextMenuLocation;
         QPoint m_dragRealStart;
         QPoint m_dragStart;
+        QPointF m_drawPolygonEndPosition;
         QRegularExpression m_locationParser;
         QSize m_legendMargins;
         Qt::Alignment m_legendAlignment;

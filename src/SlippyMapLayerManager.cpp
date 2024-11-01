@@ -1,6 +1,7 @@
 #include "SlippyMap/SlippyMapLayerManager.h"
 #include "SlippyMap/SlippyMapLayer.h"
 #include "SlippyMap/SlippyMapLayerObject.h"
+#include "SlippyMap/SlippyMapAnimatedLayer.h"
 
 #include <QDebug>
 #include <QFile>
@@ -114,6 +115,10 @@ QVariant SlippyMapLayerManager::data(const QModelIndex &index, int role) const
     for (SlippyMapLayer *layer : m_layers) {
         if (layer != nullptr && layer->objects().contains(obj)) {
             switch (role) {
+                case Qt::UserRole:
+                    if (index.column() == 1)
+                        return QVariant::fromValue<void*>(obj);
+                    return QVariant();
                 case Qt::DisplayRole:
                     switch (index.column()) {
                         case 0:
@@ -217,8 +222,31 @@ void SlippyMapLayerManager::removeLayerObject(SlippyMapLayer *layer, SlippyMapLa
     Q_CHECK_PTR(layer);
     Q_CHECK_PTR(object);
     Q_ASSERT(m_layers.contains(layer));
-    beginRemoveRows(createIndex(m_layers.indexOf(layer), 0, layer), layer->objects().indexOf(object), layer->objects().indexOf(object));
+
+    beginRemoveRows(
+            createIndex(
+                    m_layers.indexOf(layer),
+                    0,
+                    layer),
+                layer->objects().indexOf(object),
+                layer->objects().indexOf(object));
+
     layer->takeObject(object);
+    endRemoveRows();
+}
+
+void SlippyMapLayerManager::removeLayerObjects(SlippyMapLayer *layer)
+{
+    Q_CHECK_PTR(layer);
+
+    beginRemoveRows(
+            createIndex(
+                    m_layers.indexOf(layer),
+                    0,
+                    layer),
+            0, layer->objects().count() - 1);
+
+    layer->removeAll();
     endRemoveRows();
 }
 
@@ -239,6 +267,9 @@ void SlippyMapLayerManager::setActiveLayer(SlippyMapLayer *layer)
     Q_ASSERT(m_layers.contains(layer));
 
     m_activeLayer = layer;
+    emit dataChanged(
+            index(0, 0),
+            index(m_layers.count() - 1, 0));
 }
 
 void SlippyMapLayerManager::setDefaultLayer(SlippyMapLayer *layer)
@@ -337,4 +368,18 @@ int SlippyMapLayerManager::objectCount() const
         count += layer->objects().count();
     }
     return count;
+}
+
+void SlippyMapLayerManager::deactivateActiveObject()
+{
+    for (auto *layer: m_layers)
+        layer->deactivateAll();
+}
+
+void SlippyMapLayerManager::updateActiveLayer()
+{
+    int r = m_layers.indexOf(m_activeLayer);
+    QModelIndex begin = index(r, 0);
+    QModelIndex end = index(r, 0);
+    emit dataChanged(begin, end);
 }

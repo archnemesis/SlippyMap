@@ -48,6 +48,8 @@ add_library(SlippyMap
         src/SlippyMapLayerObjectCommonPropertyPage.cpp
         include/SlippyMap/SlippyMapLayerEllipse.h
         src/SlippyMapLayerEllipse.cpp
+        include/SlippyMap/SlippyMapAnimatedLayer.h
+        src/SlippyMapAnimatedLayer.cpp
 )
 
 target_include_directories(SlippyMap PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

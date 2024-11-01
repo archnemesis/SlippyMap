@@ -7,6 +7,7 @@
 #include "SlippyMap/SlippyMapLayer.h"
 #include "SlippyMap/SlippyMapLayerManager.h"
 #include "SlippyMap/SlippyMapLayerObject.h"
+#include "SlippyMap/SlippyMapAnimatedLayer.h"
 
 #include <cmath>
 
@@ -83,10 +84,14 @@ SlippyMapWidget::SlippyMapWidget(QWidget *parent)
     m_scaleTextFont.setPixelSize(12);
     m_scaleTextFont.setBold(true);
 
+    QColor drawFillColor(qApp->palette().highlight().color());
+    drawFillColor.setAlpha(64);
     m_drawBrush.setStyle(Qt::SolidPattern);
-    m_drawBrush.setColor(QColor(255, 255, 255, 128));
+    m_drawBrush.setColor(drawFillColor);
     m_drawPen.setStyle(Qt::SolidLine);
-    m_drawPen.setColor(Qt::white);
+    m_drawPen.setColor(qApp->palette().highlight().color());
+    m_drawPen.setCosmetic(true);
+    m_drawPen.setWidth(1);
 }
 
 SlippyMapWidget::~SlippyMapWidget()
@@ -490,7 +495,7 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
 
     /* ----- Dragging and Drawing ----- */
 
-    if (m_dragging && m_drawMode != NoDrawing) {
+    if (m_drawMode != NoDrawing) {
         switch (m_drawMode) {
             case RectDrawing:
                 painter.setBrush(m_drawBrush);
@@ -502,6 +507,22 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
                 painter.setPen(m_drawPen);
                 painter.drawEllipse(QRect(m_drawModeRect_topLeft, m_drawModeRect_bottomRight));
                 break;
+            case PolygonDrawing: {
+                if (m_drawPolygonPoints.count() > 0) {
+                    painter.setBrush(Qt::NoBrush);
+                    painter.setPen(m_drawPen);
+                    painter.save();
+                    painter.setWorldTransform(m3);
+                    for (int i = 0; i < m_drawPolygonPoints.count() - 1; i++) {
+                        const auto &p1 = m_drawPolygonPoints.at(i);
+                        const auto &p2 = m_drawPolygonPoints.at(i + 1);
+                        painter.drawLine(p1, p2);
+                    }
+                    painter.drawLine(m_drawPolygonPoints.last(), m_drawPolygonEndPosition);
+                    painter.restore();
+                }
+                break;
+            }
             default:
                 break;
         }
@@ -567,9 +588,27 @@ bool SlippyMapWidget::event(QEvent *event)
         return true;
     }
     if (event->type() == QEvent::MouseButtonDblClick) {
-        qDebug() << "Got double click";
-        if (m_activeObject != nullptr) {
-            emit objectDoubleClicked(m_activeObject);
+        if (m_drawMode != NoDrawing) {
+            if (m_drawMode == PolygonDrawing) {
+                // append this last point
+                auto *mouseEvent = dynamic_cast<QMouseEvent*>(event);
+                if (mouseEvent) {
+                    QPoint mousePos = mouseEvent->pos();
+                    double mouseLat = widgetY2lat(mousePos.y());
+                    double mouseLon = widgetX2long(mousePos.x());
+                    QPointF mouseCoords = QPointF(mouseLon, mouseLat);
+                    m_drawPolygonPoints.append(mouseCoords);
+                    m_drawMode = NoDrawing;
+                    emit drawModeChanged(NoDrawing);
+                    emit polygonSelected(m_drawPolygonPoints);
+                }
+            }
+        }
+        else {
+            qDebug() << "Got double click";
+            if (m_activeObject != nullptr) {
+                emit objectDoubleClicked(m_activeObject);
+            }
         }
         return true;
     }
@@ -602,7 +641,7 @@ void SlippyMapWidget::mousePressEvent(QMouseEvent *event)
                                 m_dragObject = object;
                                 m_activeObject = object;
                                 m_layerManager->setActiveLayer(layer);
-                                layer->deactivateAll();
+                                m_layerManager->deactivateActiveObject();
                                 object->setActive(true);
                                 emit objectActivated(object);
                                 update();
@@ -618,6 +657,10 @@ void SlippyMapWidget::mousePressEvent(QMouseEvent *event)
                 case RectDrawing:
                 case EllipseDrawing:
                     m_drawModeRect_topLeft = m_dragStart;
+                    break;
+                case PolygonDrawing:
+                    qDebug() << "Beginning polygon draw...";
+                    m_drawPolygonPoints.append(mouseCoords);
                     break;
                 default:
                     break;
@@ -638,9 +681,10 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
                 for (SlippyMapLayer *layer : m_layerManager->layers()) {
                     for (SlippyMapLayerObject *object : layer->objects()) {
                         if (layer->isVisible() && object->contains(geoPos, m_zoomLevel)) {
+                            if (m_activeObject == object) return;
                             m_activeObject = object;
                             m_layerManager->setActiveLayer(layer);
-                            layer->deactivateAll();
+                            m_layerManager->deactivateActiveObject();
                             object->setActive(true);
                             emit objectActivated(object);
                             update();
@@ -654,7 +698,7 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
                 if (m_activeObject != nullptr) {
                     for (auto *layer : m_layerManager->layers()) {
                         if (layer->contains(m_activeObject)) {
-                            layer->deactivateAll();
+                            m_layerManager->deactivateActiveObject();
                             m_activeObject->setActive(false);
                             emit objectDeactivated(m_activeObject);
                             m_activeObject = nullptr;
@@ -671,8 +715,10 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
             setCursor(Qt::OpenHandCursor);
             return;
         }
-        else {
+        // a polygon goes until a double-click event
+        else if (m_drawMode != PolygonDrawing) {
             m_drawMode = NoDrawing;
+            emit drawModeChanged(NoDrawing);
             setCursor(Qt::ArrowCursor);
             update();
         }
@@ -686,6 +732,9 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
             case EllipseDrawing:
                 emit ellipseSelected(QRect(m_drawModeRect_topLeft, m_drawModeRect_bottomRight));
                 break;
+            case PolygonDrawing:
+                // do nothing and don't stop drawing
+                return;
             default:
                 break;
         }
@@ -746,6 +795,8 @@ void SlippyMapWidget::mouseMoveEvent(QMouseEvent *event)
                 m_drawModeRect_bottomRight = mousePos;
                 break;
             }
+            case PolygonDrawing:
+                m_drawPolygonEndPosition = mouseCoords;
             default:
                 break;
         }
@@ -825,8 +876,8 @@ void SlippyMapWidget::contextMenuEvent(QContextMenuEvent *event)
 //    m_coordAction->setText(latLonToString(widgetY2lat(event->y()), widgetX2long(event->x())));
 //    m_contextMenuLocation = event->pos();
 //    m_addMarkerAction->setVisible(true);
-//    m_deleteMarkerAction->setVisible(false);
-//    m_markerPropertiesAction->setVisible(false);
+//    m_deleteObjectAction->setVisible(false);
+//    m_objectPropertiesAction->setVisible(false);
 //    m_activeMarker = nullptr;
 
 //    if (m_markerModel != nullptr) {
@@ -841,8 +892,8 @@ void SlippyMapWidget::contextMenuEvent(QContextMenuEvent *event)
 //                        10, 10);
 //            if (marker_box.contains(event->pos())) {
 //                m_addMarkerAction->setVisible(false);
-//                m_markerPropertiesAction->setVisible(true);
-//                m_deleteMarkerAction->setVisible(true);
+//                m_objectPropertiesAction->setVisible(true);
+//                m_deleteObjectAction->setVisible(true);
 //                m_activeMarker = marker;
 //                break;
 //            }
@@ -855,8 +906,8 @@ void SlippyMapWidget::contextMenuEvent(QContextMenuEvent *event)
 //        if (event->x() > (marker_x - 5) && event->x() < (marker_x + 5)) {
 //            if (event->y() > (marker_y - 5) && event->y() < (marker_y + 5)) {
 //                m_addMarkerAction->setVisible(false);
-//                m_markerPropertiesAction->setVisible(true);
-//                m_deleteMarkerAction->setVisible(true);
+//                m_objectPropertiesAction->setVisible(true);
+//                m_deleteObjectAction->setVisible(true);
 //                m_activeMarker = marker;
 //                break;
 //            }
@@ -927,6 +978,8 @@ QPointF SlippyMapWidget::widgetCoordsToGeoCoords(QPoint point)
 void SlippyMapWidget::setDrawMode(SlippyMapWidget::DrawMode mode)
 {
     setCursor(Qt::CrossCursor);
+    m_drawPolygonPoints.clear();
+    m_drawPolygonEndPosition = {0, 0};
     m_drawMode = mode;
 }
 
@@ -966,6 +1019,11 @@ double SlippyMapWidget::latitude() const {
 
 double SlippyMapWidget::longitude() const {
     return m_lon;
+}
+
+QPointF SlippyMapWidget::position() const
+{
+    return {m_lon, m_lat};
 }
 
 double SlippyMapWidget::degPerPixelX() const
@@ -1287,4 +1345,38 @@ void SlippyMapWidget::setUserAgent(const QString &userAgent)
 const QString &SlippyMapWidget::userAgent() const
 {
     return m_userAgentString;
+}
+
+void SlippyMapWidget::setActiveObject(SlippyMapLayerObject *object)
+{
+    for (SlippyMapLayer *layer : m_layerManager->layers()) {
+        if (layer->contains(object)) {
+            m_activeObject = object;
+            m_layerManager->setActiveLayer(layer);
+            m_layerManager->deactivateActiveObject();
+            object->setActive(true);
+            emit objectActivated(object);
+            update();
+            return;
+        }
+    }
+
+}
+
+void SlippyMapWidget::nextFrame()
+{
+    for (auto *layer : m_layers) {
+        auto *animated = dynamic_cast<SlippyMapAnimatedLayer*>(layer);
+        if (animated)
+            animated->nextFrame();
+    }
+}
+
+void SlippyMapWidget::previousFrame()
+{
+    for (auto *layer : m_layers) {
+        auto *animated = dynamic_cast<SlippyMapAnimatedLayer*>(layer);
+        if (animated)
+            animated->previousFrame();
+    }
 }
