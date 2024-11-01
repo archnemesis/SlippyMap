@@ -1,0 +1,3 @@
+[submodule "Qt-Color-Widgets"]
+	path = Qt-Color-Widgets
+	url = https://gitlab.com/mattbas/Qt-Color-Widgets.git
