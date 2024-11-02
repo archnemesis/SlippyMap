@@ -55,10 +55,11 @@ namespace SlippyMap
         };
 
         enum DrawMode {
+            PathDrawing,
             NoDrawing,
             RectDrawing,
             EllipseDrawing,
-            PolygonDrawing
+            PolygonDrawing,
         };
 
         explicit SlippyMapWidget(QWidget *parent = nullptr);
@@ -92,6 +93,7 @@ namespace SlippyMap
         void setDrawingStrokeWidth(int width);
         void setDrawingStrokeColor(const QColor& color);
         void setDrawingFillColor(const QColor& color);
+        void setDrawingLineWidth(int width);
         void setUserAgent(const QString& userAgent);
         void takeLayer(SlippyMapWidgetLayer *layer);
         void setActiveObject(SlippyMapLayerObject *object);
@@ -101,20 +103,12 @@ namespace SlippyMap
         void increaseZoomLevel();
         void setCenter(QPointF position);
         void setCenter(double latitude, double longitude);
-        void setTextLocation(const QString& location);
         void setZoomLevel(int zoom);
         void nextFrame();
         void previousFrame();
 
     protected slots:
-        void centerMapActionTriggered();
-        void copyCoordinatesActionTriggered();
-        void copyLatitudeActionTriggered();
-        void copyLongitudeActionTriggered();
-        void onMarkerChanged();
         void remap();
-        void zoomInHereActionTriggered();
-        void zoomOutHereActionTriggered();
 
     protected:
         void paintEvent(QPaintEvent *event) override;
@@ -129,6 +123,7 @@ namespace SlippyMap
         void contextMenuEvent(QContextMenuEvent *event) override;
         void keyPressEvent(QKeyEvent *event) override;
         QPixmap drawLegend(SlippyMapWidgetLayer *layer, int width, int height);
+        void initDrawingStyle();
 
     signals:
         void centerChanged(double latitude, double longitude);
@@ -144,6 +139,7 @@ namespace SlippyMap
         void rectSelected(const QRect &rect);
         void ellipseSelected(const QRect &rect);
         void polygonSelected(const QList<QPointF>& points);
+        void pathSelected(const QList<QPointF>& points);
         void drawModeChanged(DrawMode mode);
         void objectActivated(SlippyMapLayerObject *object);
         void objectDeactivated(SlippyMapLayerObject *object);
@@ -199,11 +195,8 @@ namespace SlippyMap
         QBrush m_scaleBrush;
         QBrush m_scaleTextBrush;
         QClipboard *m_clipboard;
-        QColor m_drawingStrokeColor;
-        QColor m_drawingFillColor;
         QFont m_scaleTextFont;
         QList<LineSet*> m_lineSets;
-        QList<QPointF> m_drawPolygonPoints;
         QList<SlippyMapWidgetLayer*> m_expiredLayers;
         QList<SlippyMapWidgetLayer*> m_layers;
         QMap<LineSet*,QVector<QLineF>> m_lineSetPaths;
@@ -216,6 +209,7 @@ namespace SlippyMap
         QPen m_markerPen;
         QPen m_scalePen;
         QPen m_scaleTextPen;
+        QPixmap m_loadingPixmap;
         QPoint m_contextMenuLocation;
         QPoint m_dragRealStart;
         QPoint m_dragStart;
@@ -228,7 +222,6 @@ namespace SlippyMap
         bool m_dragStarted = false;
         double m_lat;
         double m_lon;
-        int m_drawingStrokeWidth = 2;
         int m_legendSpacing;
         int m_maxZoom = 18;
         int m_minZoom = 0;
@@ -253,13 +246,20 @@ namespace SlippyMap
 
         /* drawing */
         DrawMode m_drawMode = NoDrawing;
+        QColor m_drawingStrokeColor;
+        QColor m_drawingFillColor;
+        QList<QPointF> m_drawPolygonPoints;
         QPoint m_drawModeRect_topLeft;
         QPoint m_drawModeRect_bottomRight;
         QBrush m_drawBrush;
         QPen m_drawPen;
+        QPen m_linePen;
+        QPen m_lineStrokePen;
         SlippyMapLayerManager *m_layerManager = nullptr;
         SlippyMapLayerObject *m_activeObject = nullptr;
         SlippyMapLayerObject *m_dragObject = nullptr;
+        int m_drawingStrokeWidth = 2;
+        int m_drawingLineWidth = 10;
     };
 
 }

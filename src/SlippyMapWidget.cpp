@@ -92,6 +92,8 @@ SlippyMapWidget::SlippyMapWidget(QWidget *parent)
     m_drawPen.setColor(qApp->palette().highlight().color());
     m_drawPen.setCosmetic(true);
     m_drawPen.setWidth(1);
+
+    m_loadingPixmap = QPixmap(":/images/loading_tile_256.png");
 }
 
 SlippyMapWidget::~SlippyMapWidget()
@@ -195,19 +197,19 @@ void SlippyMapWidget::setTileCachingEnabled(bool enabled)
 void SlippyMapWidget::setDrawingStrokeWidth(int width)
 {
     m_drawingStrokeWidth = width;
-    m_drawPen.setWidth(width);
+    initDrawingStyle();
 }
 
 void SlippyMapWidget::setDrawingStrokeColor(const QColor &color)
 {
     m_drawingStrokeColor = color;
-    m_drawPen.setColor(color);
+    initDrawingStyle();
 }
 
 void SlippyMapWidget::setDrawingFillColor(const QColor &color)
 {
     m_drawingFillColor = color;
-    m_drawBrush.setColor(color);
+    initDrawingStyle();
 }
 
 void SlippyMapWidget::setTileCacheDir(QString dir)
@@ -220,6 +222,11 @@ void SlippyMapWidget::setTileCacheDir(QString dir)
 void SlippyMapWidget::setLayerManager(SlippyMapLayerManager *manager)
 {
     m_layerManager = manager;
+    connect(m_layerManager,
+            &SlippyMapLayerManager::layerObjectUpdated,
+            [this]() {
+        update();
+    });
     update();
 }
 
@@ -264,128 +271,6 @@ void SlippyMapWidget::decreaseZoomLevel()
     }
 }
 
-void SlippyMapWidget::setTextLocation(const QString& location)
-{
-    QRegularExpressionMatch match = m_locationParser.match(location);
-    if (!match.hasMatch()) {
-        QMessageBox::critical(
-                this,
-                tr("Location Error"),
-                tr("Unable to parse location. Please try again."));
-        return;
-    }
-
-    QString match_lat = match.captured(1);
-    QString match_lat_card = match.captured(2);
-    QString match_lon = match.captured(3);
-    QString match_lon_card = match.captured(4);
-
-    double lat;
-    double lon;
-
-    if (match_lat.length() > 0) {
-        bool ok;
-        lat = match_lat.toDouble(&ok);
-
-        if (!ok) {
-            goto parseError;
-        }
-
-        if (match_lat_card.length() == 1) {
-            if (match_lat_card == "N") {
-                lat = fabs(lat);
-            }
-            else {
-                lat = -1 * fabs(lat);
-            }
-        }
-    }
-    else {
-        goto parseError;
-    }
-
-    if (match_lon.length() > 0) {
-        bool ok;
-        lon = match_lon.toDouble(&ok);
-
-        if (!ok) {
-            goto parseError;
-        }
-
-        if (match_lon_card.length() == 1) {
-            if (match_lon_card == "E") {
-                lon = fabs(lon);
-            }
-            else {
-                lon = -1 * fabs(lon);
-            }
-        }
-    }
-    else {
-        goto parseError;
-    }
-
-    setCenter(lat, lon);
-
-    return;
-
-    parseError:
-    QMessageBox::critical(
-            this,
-            tr("Location Error"),
-            tr("Unable to parse location. Please try again."));
-}
-
-void SlippyMapWidget::centerMapActionTriggered()
-{
-    double lat = widgetY2lat(m_contextMenuLocation.y());
-    double lon = widgetX2long(m_contextMenuLocation.x());
-    setCenter(lat, lon);
-}
-
-void SlippyMapWidget::zoomInHereActionTriggered()
-{
-    double lat = widgetY2lat(m_contextMenuLocation.y());
-    double lon = widgetX2long(m_contextMenuLocation.x());
-    setCenter(lat, lon);
-    increaseZoomLevel();
-}
-
-void SlippyMapWidget::zoomOutHereActionTriggered()
-{
-    double lat = widgetY2lat(m_contextMenuLocation.y());
-    double lon = widgetX2long(m_contextMenuLocation.x());
-    setCenter(lat, lon);
-    decreaseZoomLevel();
-}
-
-void SlippyMapWidget::copyCoordinatesActionTriggered()
-{
-    double lat = widgetY2lat(m_contextMenuLocation.y());
-    double lon = widgetX2long(m_contextMenuLocation.x());
-    QString str = latLonToString(lat, lon);
-    m_clipboard->setText(str);
-}
-
-void SlippyMapWidget::copyLatitudeActionTriggered()
-{
-    double lat = widgetY2lat(m_contextMenuLocation.y());
-    QString str = QString("%1").arg(lat, 8, 'f', 4, '0');
-    m_clipboard->setText(str);
-}
-
-void SlippyMapWidget::copyLongitudeActionTriggered()
-{
-    double lon = widgetX2long(m_contextMenuLocation.x());
-    QString str = QString("%1").arg(lon, 8, 'f', 4, '0');
-    m_clipboard->setText(str);
-}
-
-void SlippyMapWidget::onMarkerChanged()
-{
-    update();
-}
-
 void SlippyMapWidget::paintEvent(QPaintEvent *event)
 {
     (void)event;
@@ -397,13 +282,17 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
     // draw base layers first
     //
     for (SlippyMapWidgetLayer *layer : m_layers) {
-        if (layer->isBaseLayer()) {
+        if (layer->isBaseLayer() && layer->isVisible()) {
             for (int i = 0; i < m_layerTileMaps[layer].size(); i++) {
                 Tile *t = m_layerTileMaps[layer].at(i);
                 if (t->isLoaded()) {
                     painter.drawPixmap(t->point(), t->pixmap());
                 }
+                else {
+                    painter.drawPixmap(t->point(), m_loadingPixmap);
+                }
             }
+            break;
         }
     }
 
@@ -411,13 +300,14 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
     // overlay layers on top
     //
     for (SlippyMapWidgetLayer *layer : m_layers) {
-        if (!layer->isBaseLayer()) {
+        if (!layer->isBaseLayer() && layer->isVisible()) {
             for (int i = 0; i < m_layerTileMaps[layer].size(); i++) {
                 Tile *t = m_layerTileMaps[layer].at(i);
                 if (t->isLoaded()) {
                     painter.drawPixmap(t->point(), t->pixmap());
                 }
             }
+            break;
         }
     }
 
@@ -495,7 +385,7 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
 
     /* ----- Dragging and Drawing ----- */
 
-    if (m_drawMode != NoDrawing && (m_dragStarted || m_drawMode == PolygonDrawing)) {
+    if (m_drawMode != NoDrawing && (m_dragStarted || m_drawMode == PolygonDrawing || m_drawMode == PathDrawing)) {
         switch (m_drawMode) {
             case RectDrawing:
                 painter.setBrush(m_drawBrush);
@@ -506,6 +396,37 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
                 painter.setBrush(m_drawBrush);
                 painter.setPen(m_drawPen);
                 painter.drawEllipse(QRect(m_drawModeRect_topLeft, m_drawModeRect_bottomRight));
+                break;
+            case PathDrawing:
+                if (m_drawPolygonPoints.count() > 0) {
+                    if (m_drawingStrokeWidth > 0) {
+                        painter.setPen(m_lineStrokePen);
+                        painter.setBrush(Qt::NoBrush);
+                        painter.save();
+                        painter.setWorldTransform(m3);
+
+                        for (int i = 0; i < m_drawPolygonPoints.count() - 1; i++) {
+                            const auto &p1 = m_drawPolygonPoints.at(i);
+                            const auto &p2 = m_drawPolygonPoints.at(i + 1);
+                            painter.drawLine(p1, p2);
+                        }
+                        painter.drawLine(m_drawPolygonPoints.last(), m_drawPolygonEndPosition);
+                        painter.restore();
+                    }
+
+                    painter.setPen(m_linePen);
+                    painter.setBrush(Qt::NoBrush);
+                    painter.save();
+                    painter.setWorldTransform(m3);
+                    for (int i = 0; i < m_drawPolygonPoints.count() - 1; i++) {
+                        const auto &p1 = m_drawPolygonPoints.at(i);
+                        const auto &p2 = m_drawPolygonPoints.at(i + 1);
+
+                        painter.drawLine(p1, p2);
+                    }
+                    painter.drawLine(m_drawPolygonPoints.last(), m_drawPolygonEndPosition);
+                    painter.restore();
+                }
                 break;
             case PolygonDrawing: {
                 if (m_drawPolygonPoints.count() > 0) {
@@ -589,7 +510,7 @@ bool SlippyMapWidget::event(QEvent *event)
     }
     if (event->type() == QEvent::MouseButtonDblClick) {
         if (m_drawMode != NoDrawing) {
-            if (m_drawMode == PolygonDrawing) {
+            if (m_drawMode == PolygonDrawing || m_drawMode == PathDrawing) {
                 // append this last point
                 auto *mouseEvent = dynamic_cast<QMouseEvent*>(event);
                 if (mouseEvent) {
@@ -597,10 +518,23 @@ bool SlippyMapWidget::event(QEvent *event)
                     double mouseLat = widgetY2lat(mousePos.y());
                     double mouseLon = widgetX2long(mousePos.x());
                     QPointF mouseCoords = QPointF(mouseLon, mouseLat);
-                    m_drawPolygonPoints.append(mouseCoords);
+                    //m_drawPolygonPoints.append(mouseCoords); // this line duplicates the last point
+
+                    if (m_drawMode == PolygonDrawing)
+                            emit polygonSelected(m_drawPolygonPoints);
+                    else
+                            emit pathSelected(m_drawPolygonPoints);
+
                     m_drawMode = NoDrawing;
+                    m_dragging = false;
+                    m_dragStarted = false;
+                    m_dragObject = nullptr;
+                    m_drawModeRect_topLeft.setX(0);
+                    m_drawModeRect_topLeft.setY(0);
+                    m_drawModeRect_bottomRight.setX(0);
+                    m_drawModeRect_bottomRight.setY(0);
                     emit drawModeChanged(NoDrawing);
-                    emit polygonSelected(m_drawPolygonPoints);
+                    update();
                 }
             }
         }
@@ -618,12 +552,15 @@ bool SlippyMapWidget::event(QEvent *event)
 void SlippyMapWidget::mousePressEvent(QMouseEvent *event)
 {
     setFocus(Qt::MouseFocusReason);
-    m_dragging = true;
-    m_dragStarted = false;
-    m_dragStart = event->pos();
-    m_dragRealStart = event->pos();
-    m_dragButton = event->button();
-    m_dragObject = nullptr;
+
+    if (!m_dragging) {
+        m_dragging = true;
+        m_dragStarted = false;
+        m_dragStart = event->pos();
+        m_dragRealStart = event->pos();
+        m_dragButton = event->button();
+        m_dragObject = nullptr;
+    }
 
     QPoint mousePos = event->pos();
     double mouseLat = widgetY2lat(mousePos.y());
@@ -660,8 +597,13 @@ void SlippyMapWidget::mousePressEvent(QMouseEvent *event)
                     m_drawModeRect_topLeft = m_dragStart;
                     m_dragStarted = true;
                     break;
+                case PathDrawing:
                 case PolygonDrawing:
                     qDebug() << "Beginning polygon draw...";
+                    if (!m_dragStarted) {
+                        m_drawModeRect_topLeft = m_dragStart;
+                        m_dragStarted = true;
+                    }
                     m_drawPolygonPoints.append(mouseCoords);
                     break;
                 default:
@@ -718,7 +660,7 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
             return;
         }
         // a polygon goes until a double-click event
-        else if (m_drawMode != PolygonDrawing) {
+        else if (m_drawMode != PolygonDrawing && m_drawMode != PathDrawing) {
             m_drawMode = NoDrawing;
             emit drawModeChanged(NoDrawing);
             setCursor(Qt::ArrowCursor);
@@ -734,6 +676,7 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
             case EllipseDrawing:
                 emit ellipseSelected(QRect(m_drawModeRect_topLeft, m_drawModeRect_bottomRight));
                 break;
+            case PathDrawing:
             case PolygonDrawing:
                 // do nothing and don't stop drawing
                 return;
@@ -805,6 +748,7 @@ void SlippyMapWidget::mouseMoveEvent(QMouseEvent *event)
                 break;
             }
             case PolygonDrawing:
+            case PathDrawing:
                 m_drawPolygonEndPosition = mouseCoords;
             default:
                 break;
@@ -1047,12 +991,6 @@ void SlippyMapWidget::remap()
     // tile coords for top left tile
     qint32 tile_x_start = tile_x - (tiles_wide - 1) / 2;
     qint32 tile_y_start = tile_y - (tiles_high - 1) / 2;
-
-//    if (tile_x_start < 0)
-//        tile_x_start += static_cast<qint32>(pow(2.0, m_zoomLevel));
-//
-//    if (tile_y_start < 0)
-//        tile_y_start += static_cast<qint32>(pow(2.0, m_zoomLevel));
 
     m_tileX = tile_x;
     m_tileY = tile_y;
@@ -1356,4 +1294,31 @@ void SlippyMapWidget::previousFrame()
         if (animated)
             animated->previousFrame();
     }
+}
+
+void SlippyMapWidget::setDrawingLineWidth(int width)
+{
+    m_drawingLineWidth = width;
+    initDrawingStyle();
+}
+
+void SlippyMapWidget::initDrawingStyle()
+{
+    m_drawBrush.setStyle(Qt::SolidPattern);
+    m_drawBrush.setColor(m_drawingFillColor);
+    m_drawPen.setStyle(Qt::SolidLine);
+    m_drawPen.setCapStyle(Qt::RoundCap);
+    m_drawPen.setColor(m_drawingStrokeColor);
+    m_drawPen.setCosmetic(true);
+    m_drawPen.setWidth(m_drawingStrokeWidth);
+    m_linePen.setStyle(Qt::SolidLine);
+    m_linePen.setCapStyle(Qt::RoundCap);
+    m_linePen.setColor(m_drawingFillColor);
+    m_linePen.setCosmetic(true);
+    m_linePen.setWidth(m_drawingLineWidth);
+    m_lineStrokePen.setStyle(Qt::SolidLine);
+    m_lineStrokePen.setCapStyle(Qt::RoundCap);
+    m_lineStrokePen.setColor(m_drawingStrokeColor);
+    m_lineStrokePen.setWidth(m_drawingLineWidth + (m_drawingStrokeWidth * 2));
+    m_lineStrokePen.setCosmetic(true);
 }

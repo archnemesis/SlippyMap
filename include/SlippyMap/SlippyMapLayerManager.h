@@ -47,12 +47,13 @@ namespace SlippyMap
         SlippyMapLayer *defaultLayer();
         QList<SlippyMapLayerObject*> objectsAtPoint(QPointF point, int zoomLevel);
 
-        signals:
-            void activeLayerChanged(SlippyMapLayer *layer);
+    signals:
+        void activeLayerChanged(SlippyMapLayer *layer);
         void layerAdded(SlippyMapLayer *layer);
         void layerRemoved(SlippyMapLayer *layer);
         void layerObjectAdded(SlippyMapLayer *layer, SlippyMapLayerObject *object);
         void layerObjectRemoved(SlippyMapLayer *layer, SlippyMapLayerObject *object);
+        void layerObjectUpdated(SlippyMapLayerObject* object);
     protected:
         QList<SlippyMapLayer*> m_layers;
         QList<SlippyMapAnimatedLayer*> m_animatedLayers;

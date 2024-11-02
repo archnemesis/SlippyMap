@@ -9,6 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 cmake_policy(SET CMP0074 NEW)
+cmake_policy(SET CMP0153 OLD)
 
 if(CMAKE_VERSION VERSION_LESS "3.7.0")
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -18,6 +19,7 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt5 COMPONENTS Network REQUIRED)
 
 add_subdirectory(examples)
+add_subdirectory(externals/Qt-Color-Widgets)
 
 export(PACKAGE SlippyMap)
 
@@ -50,11 +52,15 @@ add_library(SlippyMap
         src/SlippyMapLayerEllipse.cpp
         include/SlippyMap/SlippyMapAnimatedLayer.h
         src/SlippyMapAnimatedLayer.cpp
+        include/SlippyMap/SlippyMapLayerPath.h
+        src/SlippyMapLayerPath.cpp
 )
 
 target_include_directories(SlippyMap PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(SlippyMap Qt5::Widgets)
-target_link_libraries(SlippyMap Qt5::Network)
+target_include_directories(SlippyMap PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/externals/Qt-Color-Widgets/include)
+target_link_libraries(SlippyMap PRIVATE Qt5::Widgets)
+target_link_libraries(SlippyMap PRIVATE Qt5::Network)
+target_link_libraries(SlippyMap PRIVATE QtColorWidgets)
 
 set_target_properties(SlippyMap PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(SlippyMap PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})

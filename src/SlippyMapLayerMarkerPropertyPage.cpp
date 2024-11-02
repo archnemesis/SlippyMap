@@ -5,6 +5,7 @@
 #include <SlippyMap/SlippyMapLayerMarkerPropertyPage.h>
 #include <SlippyMap/SlippyMapWidgetMarker.h>
 
+
 #include <QDebug>
 #include <QLineEdit>
 #include <QPlainTextEdit>
@@ -22,7 +23,7 @@ void SlippyMapLayerMarkerPropertyPage::setupUi()
 {
     qDebug() << "Setting up Marker property page UI";
     m_radius = new QLineEdit;
-    m_color = new QLineEdit;
+    m_color = new ColorSelector;
 
     if (!m_object->isEditable()) {
         m_radius->setEnabled(false);
@@ -31,11 +32,7 @@ void SlippyMapLayerMarkerPropertyPage::setupUi()
 
     auto *marker = qobject_cast<SlippyMapWidgetMarker*>(m_object);
 
-    m_color->setText(marker->color().name(QColor::HexRgb));
-    m_radius->setText(QString("%1").arg(marker->radius()));
-
-    QColor markerColor = marker->color();
-    m_color->setText(markerColor.name(QColor::HexArgb));
+    m_color->setColor(marker->color());
     m_radius->setText(QString("%1").arg(marker->radius()));
 
     auto *stylePropertiesLayout = new QFormLayout();
@@ -48,19 +45,14 @@ void SlippyMapLayerMarkerPropertyPage::setupUi()
 void SlippyMapLayerMarkerPropertyPage::updateUi()
 {
     auto *marker = qobject_cast<SlippyMapWidgetMarker*>(m_object);
-
-    m_color->setText(marker->color().name(QColor::HexRgb));
-    m_radius->setText(QString("%1").arg(marker->radius()));
-
-    QColor markerColor = marker->color();
-    m_color->setText(markerColor.name(QColor::HexArgb));
+    m_color->setColor(marker->color());
     m_radius->setText(QString("%1").arg(marker->radius()));
 }
 
 void SlippyMapLayerMarkerPropertyPage::save()
 {
     auto *obj = qobject_cast<SlippyMapWidgetMarker*>(m_object);
-    QColor newColor = QColor(m_color->text());
+    QColor newColor = m_color->color();
     obj->setColor(newColor);
     obj->setRadius(m_radius->text().toInt());
 }

@@ -62,7 +62,6 @@ void SlippyMapLayerPolygon::draw(QPainter *painter, const QTransform &transform,
 
         painter->restore();
 
-
         /* resize handles */
         for (QPointF point : m_points) {
             QPointF mapped = transform.map(point);
@@ -285,4 +284,9 @@ void SlippyMapLayerPolygon::setFillColor(const QColor &color)
 QList<SlippyMapLayerObjectPropertyPage*> SlippyMapLayerPolygon::propertyPages() const
 {
     return {new SlippyMapLayerPolygonPropertyPage((SlippyMapLayerObject *) this)};
+}
+
+QList<QRectF> SlippyMapLayerPolygon::resizeHandles(const QTransform& transform) const
+{
+    return {};
 }

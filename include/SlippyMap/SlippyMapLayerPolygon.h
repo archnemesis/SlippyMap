@@ -32,6 +32,7 @@ namespace SlippyMap {
         int strokeWidth() const;
         void setPosition(const QPointF& position) override;
         void unserialize(QDataStream& stream) override;
+        QList<QRectF> resizeHandles(const QTransform& transform) const override;
         void setStrokeColor(const QColor& color);
         void setStrokeWidth(int width);
         void setFillColor(const QColor& color);

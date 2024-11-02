@@ -29,43 +29,43 @@ SlippyMapWidgetMarker::SlippyMapWidgetMarker(const QPointF &position, QObject *p
     m_position = position;
 }
 
- QDataStream &operator<<(QDataStream &stream, const SlippyMapWidgetMarker marker)
- {
-     stream << marker.label();
-     stream << marker.description();
-     stream << marker.position();
-     stream << marker.radius();
-     stream << marker.color();
-     stream << marker.icon();
+QDataStream &operator<<(QDataStream &stream, const SlippyMapWidgetMarker marker)
+{
+    stream << marker.label();
+    stream << marker.description();
+    stream << marker.position();
+    stream << marker.radius();
+    stream << marker.color();
+    stream << marker.icon();
 
-     return stream;
- }
+    return stream;
+}
 
- QDataStream &operator>>(QDataStream &stream, SlippyMapWidgetMarker &marker)
- {
-     QString label;
-     QString description;
-     QPointF position;
-     int radius;
-     QColor color;
-     QImage icon;
+QDataStream &operator>>(QDataStream &stream, SlippyMapWidgetMarker &marker)
+{
+    QString label;
+    QString description;
+    QPointF position;
+    int radius;
+    QColor color;
+    QImage icon;
 
-     stream >> label;
-     stream >> description;
-     stream >> position;
-     stream >> radius;
-     stream >> color;
-     stream >> icon;
+    stream >> label;
+    stream >> description;
+    stream >> position;
+    stream >> radius;
+    stream >> color;
+    stream >> icon;
 
-     marker.setLabel(label);
-     marker.setDescription(description);
-     marker.setPosition(position);
-     marker.setRadius(radius);
-     marker.setColor(color);
-     marker.setIcon(icon);
+    marker.setLabel(label);
+    marker.setDescription(description);
+    marker.setPosition(position);
+    marker.setRadius(radius);
+    marker.setColor(color);
+    marker.setIcon(icon);
 
-     return stream;
- }
+    return stream;
+}
 
 void SlippyMapWidgetMarker::draw(QPainter *painter, const QTransform &transform, ObjectState state)
 {
@@ -103,7 +103,7 @@ void SlippyMapWidgetMarker::draw(QPainter *painter, const QTransform &transform,
         }
     }
     else {
-        if (isActive()) {
+        if (state == ObjectState::SelectedState) {
             painter->setBrush(m_activeDotBrush);
             painter->setPen(m_activeDotPen);
             painter->drawEllipse(pos, m_radius + 5, m_radius + 5);

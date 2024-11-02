@@ -185,6 +185,9 @@ void SlippyMapLayerManager::addLayerObject(SlippyMapLayer *layer, SlippyMapLayer
     int last = first + 1;
     beginInsertRows(createIndex(m_layers.indexOf(layer), 0, layer), first, last);
     layer->addObject(object);
+    connect(object, &SlippyMapLayerObject::updated, [this, object]() {
+        emit layerObjectUpdated(object);
+    });
     endInsertRows();
 }
 

@@ -6,12 +6,15 @@
 #define SLIPPYMAPLAYERMARKERPROPERTYPAGE_H
 
 #include "SlippyMapLayerObjectPropertyPage.h"
+#include <QtColorWidgets/ColorSelector>
 
 class QLineEdit;
 class QTabWidget;
 class QLabel;
 class QPlainTextEdit;
 class QCheckBox;
+
+using namespace color_widgets;
 
 
 class SlippyMapLayerMarkerPropertyPage : public SlippyMapLayerObjectPropertyPage {
@@ -31,7 +34,7 @@ protected:
     QLineEdit *m_latitude;
     QLineEdit *m_longitude;
     QLineEdit *m_radius;
-    QLineEdit *m_color;
+    ColorSelector *m_color;
     QCheckBox *m_visibility;
     QPlainTextEdit *m_description;
     QTabWidget *m_tabWidget;

@@ -58,14 +58,14 @@ namespace SlippyMap
          * handles that need to be shown when selected.
          * @return true if the object has resize handles
          */
-        bool hasResizeHandles() const { return false; }
+        virtual bool hasResizeHandles() const { return false; }
 
         /**
          * Returns the bounding rectangles for the objects
          * resize handles, used for hit detection.
          * @return
          */
-        QList<QRectF> resizeHandles() const { return {}; }
+        virtual QList<QRectF> resizeHandles(const QTransform& transform) const { return {}; }
 
         /**
          * Return the cursor shape for when the mouse is over
@@ -73,7 +73,7 @@ namespace SlippyMap
          * @param point
          * @return
          */
-        Qt::CursorShape cursorShape(const QPointF& point) const { return Qt::PointingHandCursor; }
+        virtual Qt::CursorShape cursorShape(const QPointF& point) const { return Qt::PointingHandCursor; }
 
         /**
          * Return the cursor shape for when the mouse is over
@@ -81,7 +81,7 @@ namespace SlippyMap
          * @param point
          * @return
          */
-        Qt::CursorShape activeCursorShape(const QPointF& point) const { return Qt::DragMoveCursor; }
+        virtual Qt::CursorShape activeCursorShape(const QPointF& point) const { return Qt::DragMoveCursor; }
 
 
     signals:
