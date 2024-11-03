@@ -227,6 +227,10 @@ void SlippyMapWidget::setLayerManager(SlippyMapLayerManager *manager)
             [this]() {
         update();
     });
+    connect(m_layerManager,
+            &SlippyMapLayerManager::layerObjectAdded,
+            this,
+            &SlippyMapWidget::layerManagerObjectAdded);
     update();
 }
 
@@ -1354,4 +1358,12 @@ void SlippyMapWidget::initDrawingStyle()
     m_lineStrokePen.setColor(m_drawingStrokeColor);
     m_lineStrokePen.setWidth(m_drawingLineWidth + (m_drawingStrokeWidth * 2));
     m_lineStrokePen.setCosmetic(true);
+}
+
+void SlippyMapWidget::layerManagerObjectAdded(SlippyMapLayer *layer, SlippyMapLayerObject *object)
+{
+    qDebug() << "Added layer object!";
+    Q_UNUSED(layer)
+    Q_UNUSED(object)
+    update();
 }

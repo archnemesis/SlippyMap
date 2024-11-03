@@ -10,7 +10,7 @@ using namespace SlippyMap;
 
 SlippyMapLayerManager::SlippyMapLayerManager(QObject *parent) : QAbstractItemModel(parent)
 {
-    m_hiddenFont.setItalic(true);
+    //m_hiddenFont.setItalic(true);
     m_activeFont.setBold(true);
 }
 
@@ -105,6 +105,11 @@ QVariant SlippyMapLayerManager::data(const QModelIndex &index, int role) const
                     return m_activeFont;
                 }
                 return QVariant();
+            case Qt::ForegroundRole:
+                if (!layer->isVisible()) {
+                    return QColor(Qt::lightGray);
+                }
+                return QVariant();
             default:
                 return QVariant();
         }
@@ -151,15 +156,13 @@ QVariant SlippyMapLayerManager::headerData(int section, Qt::Orientation orientat
     (void)orientation;
 
     if (role != Qt::DisplayRole) {
-        return QVariant();
+        return {};
     }
 
-    switch (section) {
-        case 0:
-            return QString("Object Name");
-        default:
-            return QVariant();
-    }
+    if (section == 0)
+        return tr("Layers");
+
+    return {};
 }
 
 void SlippyMapLayerManager::addLayer(SlippyMapLayer *layer)
@@ -189,6 +192,7 @@ void SlippyMapLayerManager::addLayerObject(SlippyMapLayer *layer, SlippyMapLayer
         emit layerObjectUpdated(object);
     });
     endInsertRows();
+    emit layerObjectAdded(layer, object);
 }
 
 void SlippyMapLayerManager::layer_onObjectAdded(SlippyMapLayerObject* object)
@@ -261,7 +265,11 @@ void SlippyMapLayerManager::takeLayer(SlippyMapLayer *layer)
     if (m_activeLayer == layer)
         m_activeLayer = nullptr;
 
+    beginRemoveRows(QModelIndex(),
+            m_layers.indexOf(layer),
+            m_layers.indexOf(layer));
     m_layers.removeOne(layer);
+    endRemoveRows();
 }
 
 void SlippyMapLayerManager::setActiveLayer(SlippyMapLayer *layer)

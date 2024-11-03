@@ -28,6 +28,7 @@ namespace SlippyMap
         virtual void copy(SlippyMapLayerObject *other) = 0;
         virtual void draw(QPainter *painter, const QTransform &transform, ObjectState state = NormalState) = 0;
         virtual void setMovable(bool movable);
+        ~SlippyMapLayerObject();
         void setActive(bool active);
         void setBrush(QBrush brush);
         void setPen(QPen pen);

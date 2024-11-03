@@ -87,4 +87,4 @@ install(TARGETS SlippyMap
 )
 
 configure_file(SlippyMap.pc.in SlippyMap.pc @ONLY)
-install(FILES ${CMAKE_BINARY_DIR}/SlippyMap.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SlippyMap.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)

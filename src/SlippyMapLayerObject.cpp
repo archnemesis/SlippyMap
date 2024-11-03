@@ -1,4 +1,5 @@
 #include "SlippyMap/SlippyMapLayerObject.h"
+#include <QDebug>
 
 using namespace SlippyMap;
 
@@ -134,6 +135,11 @@ void SlippyMapLayerObject::setEditable(bool editable)
 void SlippyMapLayerObject::copy(SlippyMapLayerObject *other)
 {
 
+}
+
+SlippyMapLayerObject::~SlippyMapLayerObject()
+{
+    qDebug() << "Layer object deleted!";
 }
 
 

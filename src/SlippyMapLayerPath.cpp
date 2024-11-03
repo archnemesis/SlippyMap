@@ -47,7 +47,6 @@ void SlippyMapLayerPath::copy(SlippyMapLayerObject *other)
     setLineColor(path->lineColor());
     setStrokeWidth(path->strokeWidth());
     setStrokeColor(path->strokeColor());
-    setPosition(path->position());
 }
 
 void SlippyMapLayerPath::draw(QPainter *painter, const QTransform &transform, SlippyMapLayerObject::ObjectState state)

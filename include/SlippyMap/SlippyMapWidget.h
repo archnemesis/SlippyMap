@@ -28,6 +28,11 @@ class QMenu;
 class QAction;
 class QClipboard;
 
+namespace SlippyMap {
+    class SlippyMapLayer;
+    class SlippyMapLayerObject;
+}
+
 namespace SlippyMap
 {
     class SlippyMapWidgetLayer;
@@ -109,6 +114,7 @@ namespace SlippyMap
 
     protected slots:
         void remap();
+        void layerManagerObjectAdded(SlippyMap::SlippyMapLayer *layer, SlippyMap::SlippyMapLayerObject *object);
 
     protected:
         void paintEvent(QPaintEvent *event) override;
