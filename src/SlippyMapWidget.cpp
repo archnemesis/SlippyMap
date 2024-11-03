@@ -835,6 +835,17 @@ void SlippyMapWidget::contextMenuEvent(QContextMenuEvent *event)
 
 void SlippyMapWidget::keyPressEvent(QKeyEvent *event)
 {
+    switch (event->key()) {
+        case Qt::Key_Plus:
+            increaseZoomLevel();
+            break;
+        case Qt::Key_Minus:
+            decreaseZoomLevel();
+            break;
+        default:
+            break;
+    }
+
     if (m_drawMode == NoDrawing) {
         if (m_activeObject != nullptr) {
             if (event->key() == Qt::Key_Delete) {
