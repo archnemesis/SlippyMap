@@ -144,6 +144,7 @@ namespace SlippyMap
         void objectActivated(SlippyMapLayerObject *object);
         void objectDeactivated(SlippyMapLayerObject *object);
         void objectDoubleClicked(SlippyMapLayerObject *object);
+        void objectWasDragged(SlippyMapLayerObject *object);
         void currentLocationButtonClicked();
 
     private:

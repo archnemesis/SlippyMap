@@ -31,6 +31,7 @@ namespace SlippyMap
         void addLayerObject(SlippyMapLayerObject *object);
         void removeLayerObject(SlippyMapLayer *layer, SlippyMapLayerObject *object);
         void removeLayerObjects(SlippyMapLayer *layer);
+        void replaceObject(SlippyMapLayerObject *object, SlippyMapLayerObject *replacement);
         void takeLayer(SlippyMapLayer *layer);
         void setActiveLayer(SlippyMapLayer *layer);
         void setDefaultLayer(SlippyMapLayer *layer);

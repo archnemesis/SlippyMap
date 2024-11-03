@@ -14,7 +14,12 @@ namespace SlippyMap
     {
     Q_OBJECT
     public:
+        explicit Q_INVOKABLE SlippyMapLayerPath(QObject *parent = nullptr);
         explicit SlippyMapLayerPath(const QVector<QPointF> &points);
+        Q_INVOKABLE SlippyMapLayerPath(const SlippyMap::SlippyMapLayerPath& other);
+
+        virtual SlippyMapLayerPath* clone() const;
+        virtual void copy(SlippyMapLayerObject *other);
         QList<SlippyMapLayerObjectPropertyPage *> propertyPages() const;
         bool contains(const QPointF &point, int zoom) const override;
         bool isIntersectedBy(const QRectF &rect) const override;
@@ -24,10 +29,12 @@ namespace SlippyMap
         void setPosition(const QPointF &position) override;
         QDataStream &serialize(QDataStream &stream) const override;
         void unserialize(QDataStream &stream) override;
+        void setPoints(const QVector<QPointF>& points);
         void setLineWidth(int width);
         void setLineColor(const QColor &color);
         void setStrokeWidth(int width);
         void setStrokeColor(const QColor &color);
+        const QVector<QPointF>& points() const;
         int lineWidth() const;
         const QColor &lineColor() const;
         int strokeWidth() const;
@@ -37,7 +44,9 @@ namespace SlippyMap
         void initStyle();
 
         QPen m_linePen;
+        QPen m_linePenSelected;
         QPen m_strokePen;
+        QPen m_strokePenSelected;
         QBrush m_strokeBrush;
         QColor m_lineColor;
         QColor m_strokeColor;

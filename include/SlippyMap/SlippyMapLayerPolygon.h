@@ -16,8 +16,12 @@ namespace SlippyMap {
         Q_OBJECT
     public:
         explicit Q_INVOKABLE SlippyMapLayerPolygon(QObject *parent = nullptr);
-        explicit Q_INVOKABLE SlippyMapLayerPolygon(QVector<QPointF> points, QObject *parent = nullptr);
+        explicit SlippyMapLayerPolygon(const QVector<QPointF>& points, QObject *parent = nullptr);
+        Q_INVOKABLE SlippyMapLayerPolygon(const SlippyMap::SlippyMapLayerPolygon& other);
         ~SlippyMapLayerPolygon() override;
+
+        virtual SlippyMapLayerPolygon* clone() const;
+        virtual void copy(SlippyMapLayerObject *other);
         void draw(QPainter *painter, const QTransform &transform, ObjectState state) override;
         QVector<QPointF> points() const;
         void setPoints(const QVector<QPointF> &points);
@@ -43,7 +47,9 @@ namespace SlippyMap {
         QColor m_strokeColor;
         int m_strokeWidth;
         QPen m_strokePen;
+        QPen m_strokePenSelected;
         QBrush m_fillBrush;
+        QBrush m_fillBrushSelected;
 
         void initStyle();
         bool test_point(const QPointF& a, const QPointF& b, const QPointF& p) const;

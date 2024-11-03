@@ -386,3 +386,14 @@ void SlippyMapLayerManager::updateActiveLayer()
     QModelIndex end = index(r, 0);
     emit dataChanged(begin, end);
 }
+
+void SlippyMapLayerManager::replaceObject(SlippyMapLayerObject *object, SlippyMapLayerObject *replacement)
+{
+    for (auto *layer: m_layers) {
+        if (layer->contains(object)) {
+            layer->replace(object, replacement);
+            layer_onObjectUpdated(replacement);
+            return;
+        }
+    }
+}

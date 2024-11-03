@@ -19,14 +19,38 @@ SlippyMapLayerPolygon::SlippyMapLayerPolygon(QObject *parent) :
     initStyle();
 }
 
-SlippyMapLayerPolygon::SlippyMapLayerPolygon(QVector<QPointF> points, QObject *parent) :
-    SlippyMapLayerObject(parent),
-    m_points(points),
-    m_fillColor(qApp->palette().base().color()),
-    m_strokeColor(qApp->palette().highlight().color()),
-    m_strokeWidth(1)
+SlippyMapLayerPolygon::SlippyMapLayerPolygon(const QVector<QPointF>& points, QObject *parent) :
+        SlippyMapLayerPolygon(parent)
 {
-    initStyle();
+    m_points = points;
+}
+
+SlippyMapLayerPolygon::SlippyMapLayerPolygon(const SlippyMapLayerPolygon &other)
+{
+    setLabel(other.label());
+    setDescription(other.description());
+    setPoints(other.points());
+    setStrokeWidth(other.strokeWidth());
+    setStrokeColor(other.strokeColor());
+    setFillColor(other.fillColor());
+}
+
+void SlippyMapLayerPolygon::copy(SlippyMapLayerObject *other)
+{
+    auto *polygon = dynamic_cast<SlippyMapLayerPolygon*>(other);
+
+    setLabel(polygon->label());
+    setDescription(polygon->description());
+    setPoints(polygon->points());
+    setStrokeWidth(polygon->strokeWidth());
+    setStrokeColor(polygon->strokeColor());
+    setFillColor(polygon->fillColor());
+    setPosition(polygon->position());
+}
+
+SlippyMapLayerPolygon *SlippyMapLayerPolygon::clone() const
+{
+    return new SlippyMapLayerPolygon(*this);
 }
 
 SlippyMapLayerPolygon::~SlippyMapLayerPolygon()
@@ -36,40 +60,20 @@ SlippyMapLayerPolygon::~SlippyMapLayerPolygon()
 
 void SlippyMapLayerPolygon::draw(QPainter *painter, const QTransform &transform, ObjectState state)
 {
-    switch (state) {
-    case NormalState:
-        painter->setPen(m_strokePen);
-        painter->setBrush(m_fillBrush);
+    painter->setPen(state == SelectedState ? m_strokePenSelected : m_strokePen);
+    painter->setBrush(state == SelectedState ? m_fillBrushSelected : m_fillBrush);
 
-        painter->save();
-        painter->setWorldTransform(transform);
-        painter->drawConvexPolygon(m_points.data(), m_points.length());
-        painter->restore();
+    painter->save();
+    painter->setWorldTransform(transform);
+    painter->drawConvexPolygon(m_points.data(), m_points.length());
+    painter->restore();
 
-        break;
-    case SelectedState:
-
-        painter->save();
-
-        painter->setPen(QPen(Qt::NoPen));
-        painter->setBrush(m_selectedBrush);
-        painter->setWorldTransform(transform);
-        painter->drawConvexPolygon(m_points.data(), m_points.length());
-
-        painter->setPen(m_selectedPen);
-        painter->setBrush(QBrush(Qt::NoBrush));
-        painter->drawConvexPolygon(m_points.data(), m_points.length());
-
-        painter->restore();
-
-        /* resize handles */
-        for (QPointF point : m_points) {
+    /* resize handles */
+    if (state == SlippyMapLayerObject::SelectedState) {
+        for (QPointF point: m_points) {
             QPointF mapped = transform.map(point);
             drawResizeHandle(painter, QPoint(static_cast<int>(mapped.x()), static_cast<int>(mapped.y())));
         }
-        break;
-    default:
-        break;
     }
 }
 
@@ -201,8 +205,18 @@ void SlippyMapLayerPolygon::initStyle()
     m_strokePen.setWidth(m_strokeWidth);
     m_strokePen.setColor(m_strokeColor);
 
+    m_strokePenSelected.setStyle(Qt::SolidLine);
+    m_strokePenSelected.setCosmetic(true);
+    m_strokePenSelected.setJoinStyle(Qt::MiterJoin);
+    m_strokePenSelected.setCapStyle(Qt::SquareCap);
+    m_strokePenSelected.setWidth(m_strokeWidth);
+    m_strokePenSelected.setColor(m_strokeColor.lighter());
+
     m_fillBrush.setStyle(Qt::SolidPattern);
     m_fillBrush.setColor(m_fillColor);
+
+    m_fillBrushSelected.setStyle(Qt::SolidPattern);
+    m_fillBrushSelected.setColor(m_fillColor.lighter());
 }
 
 bool SlippyMapLayerPolygon::test_point(const QPointF& a, const QPointF& b, const QPointF& p) const

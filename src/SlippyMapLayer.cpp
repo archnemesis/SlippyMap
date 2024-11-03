@@ -115,6 +115,12 @@ bool SlippyMapLayer::isEditable()
     return m_editable;
 }
 
+void SlippyMapLayer::replace(SlippyMapLayerObject *object, SlippyMapLayerObject *replacement)
+{
+    if (m_objects.contains(object))
+        m_objects.replace(m_objects.indexOf(object), replacement);
+}
+
 QDataStream &operator<<(QDataStream &stream, const SlippyMapLayer *layer)
 {
     stream << layer->name();

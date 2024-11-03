@@ -29,10 +29,11 @@ namespace SlippyMap
         Q_PROPERTY(bool editable MEMBER m_editable READ isEditable)
 
     public:
-        Q_INVOKABLE SlippyMapWidgetMarker(QObject *parent = nullptr);
-        Q_INVOKABLE SlippyMapWidgetMarker(const SlippyMapWidgetMarker& other);
-        SlippyMapWidgetMarker(const QPointF &position, QObject *parent = nullptr);
-
+        explicit Q_INVOKABLE SlippyMapWidgetMarker(QObject *parent = nullptr);
+        explicit SlippyMapWidgetMarker(const QPointF &position, QObject *parent = nullptr);
+        Q_INVOKABLE SlippyMapWidgetMarker(const SlippyMap::SlippyMapWidgetMarker& other);
+        virtual SlippyMapLayerObject* clone() const;
+        virtual void copy(SlippyMapLayerObject* other);
         void draw(QPainter *painter, const QTransform &transform, ObjectState state) override;
         bool contains(const QPointF &point, int zoom) const;
         const QSizeF size() const override;

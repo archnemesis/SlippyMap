@@ -131,5 +131,10 @@ void SlippyMapLayerObject::setEditable(bool editable)
     m_editable = editable;
 }
 
+void SlippyMapLayerObject::copy(SlippyMapLayerObject *other)
+{
+
+}
+
 
 

@@ -15,7 +15,6 @@ namespace SlippyMap
         Q_OBJECT
     public:
         explicit SlippyMapLayer(QObject *parent = nullptr);
-
         void addObject(SlippyMapLayerObject *object);
         void takeObject(SlippyMapLayerObject *object);
         QList<SlippyMapLayerObject*> objects() const;
@@ -28,6 +27,7 @@ namespace SlippyMap
         void setVisible(const bool visible);
         void setEditable(const bool editable);
         bool contains(SlippyMapLayerObject *object);
+        void replace(SlippyMapLayerObject *object, SlippyMapLayerObject *replacement);
         int indexOf(SlippyMapLayerObject *object);
         void deactivateAll();
         void removeAll();

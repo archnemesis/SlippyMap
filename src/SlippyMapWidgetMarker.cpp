@@ -27,6 +27,17 @@ SlippyMapWidgetMarker::SlippyMapWidgetMarker(const QPointF &position, QObject *p
         SlippyMapWidgetMarker (parent)
 {
     m_position = position;
+    initStyle();
+}
+
+SlippyMapWidgetMarker::SlippyMapWidgetMarker(const SlippyMapWidgetMarker &other)
+{
+    setLabel(other.label());
+    setDescription(other.description());
+    SlippyMapWidgetMarker::setPosition(other.position());
+    setRadius(other.radius());
+    setColor(other.color());
+    setIcon(other.icon());
 }
 
 QDataStream &operator<<(QDataStream &stream, const SlippyMapWidgetMarker marker)
@@ -267,19 +278,30 @@ void SlippyMapWidgetMarker::unserialize(QDataStream& stream)
     setRadius(radius);
     setColor(color);
     setIcon(icon);
-}
-
-SlippyMapWidgetMarker::SlippyMapWidgetMarker(const SlippyMapWidgetMarker &other)
-{
-    setLabel(other.label());
-    setDescription(other.description());
-    SlippyMapWidgetMarker::setPosition(other.position());
-    setRadius(other.radius());
-    setColor(other.color());
-    setIcon(other.icon());
+    initStyle();
 }
 
 QList<SlippyMapLayerObjectPropertyPage*> SlippyMapWidgetMarker::propertyPages() const
 {
     return {new SlippyMapLayerMarkerPropertyPage((SlippyMapLayerObject *) this)};
 }
+
+SlippyMapLayerObject *SlippyMapWidgetMarker::clone() const
+{
+    return new SlippyMapWidgetMarker(*this);
+}
+
+void SlippyMapWidgetMarker::copy(SlippyMapLayerObject *other)
+{
+    auto *marker = dynamic_cast<SlippyMapWidgetMarker*>(other);
+    setLabel(marker->label());
+    setDescription(marker->description());
+    setRadius(marker->radius());
+    setColor(marker->color());
+    setIcon(marker->icon());
+    setPosition(marker->position());
+    initStyle();
+    emit updated();
+}
+
+

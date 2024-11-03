@@ -259,6 +259,7 @@ void SlippyMapWidget::increaseZoomLevel()
         m_zoomLevel++;
         m_expiredLayers = m_layers;
         remap();
+        update();
     }
 }
 
@@ -268,6 +269,7 @@ void SlippyMapWidget::decreaseZoomLevel()
         m_zoomLevel--;
         m_expiredLayers = m_layers;
         remap();
+        update();
     }
 }
 
@@ -277,6 +279,8 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
     painter.setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing);
+
+    if (m_activeObject != nullptr && !m_layerManager->contains(m_activeObject)) m_activeObject = nullptr;
 
     //
     // draw base layers first
@@ -364,7 +368,7 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
         for (SlippyMapLayer *layer : m_layerManager->layers()) {
             if (layer->isVisible()) {
                 for (SlippyMapLayerObject *obj : layer->objects()) {
-                    if (obj->isVisible() && !obj->isActive()) {
+                    if (obj->isVisible() && m_activeObject != obj) {
                         if (obj->isIntersectedBy(bbox)) {
                             obj->draw(&painter, m3, SlippyMapLayerObject::NormalState);
                         }
@@ -373,7 +377,7 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
 
                 // draw active things on top
                 for (SlippyMapLayerObject *obj : layer->objects()) {
-                    if (obj->isVisible() && obj->isActive()) {
+                    if (obj->isVisible() && m_activeObject == obj) {
                         if (obj->isIntersectedBy(bbox)) {
                             obj->draw(&painter, m3, SlippyMapLayerObject::SelectedState);
                         }
@@ -514,12 +518,6 @@ bool SlippyMapWidget::event(QEvent *event)
                 // append this last point
                 auto *mouseEvent = dynamic_cast<QMouseEvent*>(event);
                 if (mouseEvent) {
-                    QPoint mousePos = mouseEvent->pos();
-                    double mouseLat = widgetY2lat(mousePos.y());
-                    double mouseLon = widgetX2long(mousePos.x());
-                    QPointF mouseCoords = QPointF(mouseLon, mouseLat);
-                    //m_drawPolygonPoints.append(mouseCoords); // this line duplicates the last point
-
                     if (m_drawMode == PolygonDrawing)
                             emit polygonSelected(m_drawPolygonPoints);
                     else
@@ -615,6 +613,9 @@ void SlippyMapWidget::mousePressEvent(QMouseEvent *event)
 
 void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
 {
+    if (event->button() == Qt::LeftButton && m_dragging && m_dragObject != nullptr && event->pos() != m_dragRealStart) {
+        emit objectWasDragged(m_dragObject);
+    }
     m_dragging = false;
 
     // this is a click on a single point (no drag happened)
@@ -830,9 +831,41 @@ void SlippyMapWidget::contextMenuEvent(QContextMenuEvent *event)
 
 void SlippyMapWidget::keyPressEvent(QKeyEvent *event)
 {
-    if (m_drawMode == PolygonDrawing) {
+    if (m_drawMode == NoDrawing) {
+        if (m_activeObject != nullptr) {
+            if (event->key() == Qt::Key_Delete) {
+                qDebug() << "TODO: delete an item when delete is pressed";
+            }
+        }
+    }
+    if (m_drawMode == PolygonDrawing || m_drawMode == PathDrawing) {
         if (event->key() == Qt::Key_Escape) {
             m_drawMode = NoDrawing;
+            m_dragging = false;
+            m_dragStarted = false;
+            m_dragObject = nullptr;
+            m_drawModeRect_topLeft.setX(0);
+            m_drawModeRect_topLeft.setY(0);
+            m_drawModeRect_bottomRight.setX(0);
+            m_drawModeRect_bottomRight.setY(0);
+            emit drawModeChanged(NoDrawing);
+            event->accept();
+            update();
+        }
+        else if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
+            if (m_drawMode == PolygonDrawing)
+                emit polygonSelected(m_drawPolygonPoints);
+            else
+                emit pathSelected(m_drawPolygonPoints);
+
+            m_drawMode = NoDrawing;
+            m_dragging = false;
+            m_dragStarted = false;
+            m_dragObject = nullptr;
+            m_drawModeRect_topLeft.setX(0);
+            m_drawModeRect_topLeft.setY(0);
+            m_drawModeRect_bottomRight.setX(0);
+            m_drawModeRect_bottomRight.setY(0);
             emit drawModeChanged(NoDrawing);
             event->accept();
             update();

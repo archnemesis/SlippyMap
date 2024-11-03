@@ -24,6 +24,8 @@ namespace SlippyMap
         };
 
         explicit SlippyMapLayerObject(QObject *parent = nullptr);
+        virtual SlippyMapLayerObject* clone() const = 0;
+        virtual void copy(SlippyMapLayerObject *other) = 0;
         virtual void draw(QPainter *painter, const QTransform &transform, ObjectState state = NormalState) = 0;
         virtual void setMovable(bool movable);
         void setActive(bool active);
@@ -101,7 +103,7 @@ namespace SlippyMap
         QPen m_activePen;
         QPen m_selectedPen;
         QPen m_selectionHandlePen;
-        int m_resizeHandleWidth = 6;
+        int m_resizeHandleWidth = 10;
         bool m_active = false;
         bool m_visible = true;
         bool m_movable = true;
