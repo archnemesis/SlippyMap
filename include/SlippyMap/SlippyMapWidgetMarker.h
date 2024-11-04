@@ -88,4 +88,6 @@ namespace SlippyMap
 QDataStream &operator<<(QDataStream& stream, const SlippyMap::SlippyMapWidgetMarker& marker);
 QDataStream &operator>>(QDataStream& stream, SlippyMap::SlippyMapWidgetMarker& marker);
 
+Q_DECLARE_METATYPE(SlippyMap::SlippyMapWidgetMarker*)
+
 #endif // SLIPPYMAPLAYERMARKER_H

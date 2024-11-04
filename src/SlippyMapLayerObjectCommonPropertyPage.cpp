@@ -75,7 +75,6 @@ void SlippyMapLayerObjectCommonPropertyPage::save()
 
 void SlippyMapLayerObjectCommonPropertyPage::setupUi()
 {
-    qDebug() << "Setting up Object property page UI";
     m_label = new QLineEdit();
     m_description = new QPlainTextEdit();
     m_latitude = new QLineEdit();
@@ -119,6 +118,7 @@ void SlippyMapLayerObjectCommonPropertyPage::setupUi()
     m_visibility->setChecked(m_object->isVisible());
 
     auto *mainPropertiesLayout = new QFormLayout();
+
     mainPropertiesLayout->addRow(tr("Label"), m_label);
     mainPropertiesLayout->addRow(tr("Description"), m_description);
     mainPropertiesLayout->addRow(tr("Latitude"), m_latitude);

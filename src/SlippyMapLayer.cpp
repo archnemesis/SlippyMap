@@ -151,6 +151,11 @@ void SlippyMapLayer::setOrder(int order)
     m_zOrder = order;
 }
 
+SlippyMapLayer::~SlippyMapLayer()
+{
+    qDebug() << "Layer" << name() << "deleted";
+}
+
 QDataStream &operator<<(QDataStream &stream, const SlippyMapLayer *layer)
 {
     stream << layer->id();

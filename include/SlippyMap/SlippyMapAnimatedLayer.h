@@ -13,6 +13,8 @@ namespace SlippyMap
     {
         Q_OBJECT
     public:
+        typedef QSharedPointer<SlippyMapAnimatedLayer> Ptr;
+
         explicit SlippyMapAnimatedLayer(QObject *parent = nullptr);
         virtual void update() = 0;
         virtual void nextFrame() = 0;

@@ -15,7 +15,10 @@ namespace SlippyMap
     {
         Q_OBJECT
     public:
+        typedef QSharedPointer<SlippyMapLayer> Ptr;
+
         explicit SlippyMapLayer(QObject *parent = nullptr);
+        ~SlippyMapLayer();
         void addObject(SlippyMapLayerObject *object);
         void takeObject(SlippyMapLayerObject *object);
         QList<SlippyMapLayerObject*> objects() const;

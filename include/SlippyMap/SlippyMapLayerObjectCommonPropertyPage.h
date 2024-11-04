@@ -18,7 +18,7 @@ public:
     explicit SlippyMapLayerObjectCommonPropertyPage(SlippyMap::SlippyMapLayerObject *object);
     SlippyMapLayerObjectCommonPropertyPage(SlippyMapLayerObject *object, SlippyMapLayerManager *layerManager);
 
-    virtual QString tabTitle();
+    QString tabTitle() override;
     void setupUi() override;
     void save() override;
 

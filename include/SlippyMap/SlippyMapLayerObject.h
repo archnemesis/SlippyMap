@@ -24,6 +24,8 @@ namespace SlippyMap
             DisabledState
         };
 
+        typedef QSharedPointer<SlippyMapLayerObject> Ptr;
+
         explicit SlippyMapLayerObject(QObject *parent = nullptr);
         virtual SlippyMapLayerObject* clone() const = 0;
         virtual void copy(SlippyMapLayerObject *other) = 0;
@@ -121,5 +123,7 @@ namespace SlippyMap
         void drawResizeHandle(QPainter *painter, QPoint point) const;
     };
 }
+
+Q_DECLARE_METATYPE(SlippyMap::SlippyMapLayerObject*)
 
 #endif // SLIPPYMAPLAYEROBJECT_H
