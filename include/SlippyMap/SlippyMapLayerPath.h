@@ -20,6 +20,8 @@ namespace SlippyMap
 
         virtual SlippyMapLayerPath* clone() const;
         virtual void copy(SlippyMapLayerObject *other);
+        void hydrateFromDatabase(const QJsonObject& json, const QString& geometry) override;
+        void saveToDatabase(QJsonObject& json, QString& geometry) override;
         QList<SlippyMapLayerObjectPropertyPage *> propertyPages() const;
         bool contains(const QPointF &point, int zoom) const override;
         bool isIntersectedBy(const QRectF &rect) const override;

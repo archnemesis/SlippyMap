@@ -3,8 +3,17 @@
 //
 
 #include "SlippyMap/SlippyMapLayerPath.h"
+#include <QJsonObject>
+
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/linestring.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
 
 using namespace SlippyMap;
+using namespace boost::geometry;
+
+typedef model::d2::point_xy<double> point_t;
+typedef model::linestring<point_t> linestring_t;
 
 SlippyMapLayerPath::SlippyMapLayerPath(QObject *parent) :
     SlippyMapLayerObject(parent),
@@ -28,6 +37,7 @@ SlippyMapLayerPath::SlippyMapLayerPath(const SlippyMapLayerPath &other) :
         m_lineWidth(10),
         m_strokeWidth(1)
 {
+    setId(other.id());
     setLabel(other.label());
     setDescription(other.description());
     setPoints(other.points());
@@ -40,6 +50,7 @@ SlippyMapLayerPath::SlippyMapLayerPath(const SlippyMapLayerPath &other) :
 void SlippyMapLayerPath::copy(SlippyMapLayerObject *other)
 {
     auto *path = dynamic_cast<SlippyMapLayerPath*>(other);
+    setId(path->id());
     setLabel(path->label());
     setDescription(path->description());
     setPoints(path->points());
@@ -47,6 +58,90 @@ void SlippyMapLayerPath::copy(SlippyMapLayerObject *other)
     setLineColor(path->lineColor());
     setStrokeWidth(path->strokeWidth());
     setStrokeColor(path->strokeColor());
+}
+
+void SlippyMapLayerPath::hydrateFromDatabase(const QJsonObject &json, const QString &geometry)
+{
+    int lineWidth = json["lineWidth"].toInt();
+    int strokeWidth = json["strokeWidth"].toInt();
+    setLineWidth(lineWidth);
+    setStrokeWidth(strokeWidth);
+
+    QColor lineColor(json["lineColor"].toString());
+    QColor strokeColor(json["strokeColor"].toString());
+    setLineColor(lineColor);
+    setStrokeColor(strokeColor);
+
+    auto linestring = from_wkt<linestring_t>(geometry.toStdString());
+
+    m_points.clear();
+    for (auto it = boost::begin(linestring); it != boost::end(linestring); it++) {
+        double x = get<0>(*it);
+        double y = get<0>(*it);
+        QPointF point(x, y);
+        m_points.append(point);
+    }
+
+    emit updated();
+}
+
+void SlippyMapLayerPath::saveToDatabase(QJsonObject &json, QString &geometry)
+{
+    json["lineWidth"] = lineWidth();
+    json["lineColor"] = lineColor().name(QColor::HexArgb);
+    json["strokeWidth"] = strokeWidth();
+    json["strokeColor"] = strokeColor().name(QColor::HexArgb);
+
+    QStringList pointStrings;
+    for (const auto& point: m_points) {
+        pointStrings.append(QString("%1 %2")
+            .arg(point.x(), 0, 'f', 7)
+            .arg(point.y(), 0, 'f', 7));
+    }
+
+    geometry = QString("LINESTRING(%1)")
+            .arg(pointStrings.join(", "));
+}
+
+QDataStream &SlippyMapLayerPath::serialize(QDataStream &stream) const
+{
+    stream << id();
+    stream << label();
+    stream << description();
+    stream << points();
+    stream << lineWidth();
+    stream << lineColor();
+    stream << strokeWidth();
+    stream << strokeColor();
+    return stream;
+}
+
+void SlippyMapLayerPath::unserialize(QDataStream &stream)
+{
+    QVariant id;
+    QString label;
+    QString description;
+    QVector<QPointF> points;
+    int lineWidth;
+    QColor lineColor;
+    int strokeWidth;
+    QColor strokeColor;
+
+    stream >> id;
+    stream >> label;
+    stream >> description;
+    stream >> lineWidth;
+    stream >> lineColor;
+    stream >> strokeWidth;
+    stream >> strokeColor;
+
+    setId(id);
+    setLabel(label);
+    setDescription(description);
+    setLineWidth(lineWidth);
+    setLineColor(lineColor);
+    setStrokeWidth(strokeWidth);
+    setStrokeColor(strokeColor);
 }
 
 void SlippyMapLayerPath::draw(QPainter *painter, const QTransform &transform, SlippyMapLayerObject::ObjectState state)
@@ -199,16 +294,6 @@ void SlippyMapLayerPath::initStyle()
     m_strokePenSelected.setColor(m_strokeColor.lighter());
     m_strokePenSelected.setWidth(m_lineWidth + (m_strokeWidth * 2));
     m_strokePenSelected.setCapStyle(Qt::RoundCap);
-}
-
-void SlippyMapLayerPath::unserialize(QDataStream &stream)
-{
-
-}
-
-QDataStream &SlippyMapLayerPath::serialize(QDataStream &stream) const
-{
-    return stream;
 }
 
 void SlippyMapLayerPath::setLineWidth(int width)

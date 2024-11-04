@@ -52,6 +52,8 @@ namespace SlippyMap
         QList<SlippyMapLayerObjectPropertyPage*> propertyPages() const;
         QDataStream& serialize(QDataStream& stream) const override;
         void unserialize(QDataStream& stream) override;
+        virtual void hydrateFromDatabase(const QJsonObject& json, const QString& geometry) override;
+        virtual void saveToDatabase(QJsonObject& json, QString& geometry) override;
 
     signals:
         void positionChanged();

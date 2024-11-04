@@ -142,5 +142,25 @@ SlippyMapLayerObject::~SlippyMapLayerObject()
     qDebug() << "Layer object deleted!";
 }
 
+void SlippyMapLayerObject::setId(const QVariant &id)
+{
+    m_id = id;
+}
+
+QVariant SlippyMapLayerObject::id() const
+{
+    return m_id;
+}
+
+void SlippyMapLayerObject::setSynced(bool synced)
+{
+    m_synced = synced;
+}
+
+bool SlippyMapLayerObject::isSynced() const
+{
+    return m_synced;
+}
+
 
 

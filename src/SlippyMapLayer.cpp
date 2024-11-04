@@ -121,8 +121,29 @@ void SlippyMapLayer::replace(SlippyMapLayerObject *object, SlippyMapLayerObject 
         m_objects.replace(m_objects.indexOf(object), replacement);
 }
 
+QVariant SlippyMapLayer::id() const
+{
+    return m_id;
+}
+
+void SlippyMapLayer::setId(const QVariant &id)
+{
+    m_id = id;
+}
+
+bool SlippyMapLayer::isSynced()
+{
+    return m_synced;
+}
+
+void SlippyMapLayer::setSynced(bool synced)
+{
+    m_synced = synced;
+}
+
 QDataStream &operator<<(QDataStream &stream, const SlippyMapLayer *layer)
 {
+    stream << layer->id();
     stream << layer->name();
     stream << layer->description();
     stream << layer->objects().length();
@@ -131,14 +152,17 @@ QDataStream &operator<<(QDataStream &stream, const SlippyMapLayer *layer)
 
 QDataStream &operator>>(QDataStream &stream, SlippyMapLayer *layer)
 {
+    QVariant id;
     QString name;
     QString description;
     int objectCount;
 
+    stream >> id;
     stream >> name;
     stream >> description;
     stream >> objectCount;
 
+    layer->setId(id);
     layer->setName(name);
     layer->setDescription(description);
 

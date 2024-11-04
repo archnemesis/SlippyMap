@@ -58,6 +58,8 @@ add_library(SlippyMap
 
 target_include_directories(SlippyMap PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(SlippyMap PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/externals/Qt-Color-Widgets/include)
+target_include_directories(SlippyMap PRIVATE "C:/boost_1_82_0")
+
 target_link_libraries(SlippyMap PRIVATE Qt5::Widgets)
 target_link_libraries(SlippyMap PRIVATE Qt5::Network)
 target_link_libraries(SlippyMap PRIVATE QtColorWidgets)

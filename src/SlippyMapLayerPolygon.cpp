@@ -4,10 +4,20 @@
 #define NOMINMAX
 #include <algorithm>
 #include <QApplication>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QDebug>
+
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
 
 using namespace std;
 using namespace SlippyMap;
+using namespace boost::geometry;
+
+typedef model::d2::point_xy<double> point_t;
+typedef model::polygon<point_t> polygon_t;
 
 SlippyMapLayerPolygon::SlippyMapLayerPolygon(QObject *parent) :
     SlippyMapLayerObject(parent),
@@ -27,6 +37,7 @@ SlippyMapLayerPolygon::SlippyMapLayerPolygon(const QVector<QPointF>& points, QOb
 
 SlippyMapLayerPolygon::SlippyMapLayerPolygon(const SlippyMapLayerPolygon &other)
 {
+    setId(other.id());
     setLabel(other.label());
     setDescription(other.description());
     setPoints(other.points());
@@ -39,6 +50,7 @@ void SlippyMapLayerPolygon::copy(SlippyMapLayerObject *other)
 {
     auto *polygon = dynamic_cast<SlippyMapLayerPolygon*>(other);
 
+    setId(polygon->id());
     setLabel(polygon->label());
     setDescription(polygon->description());
     setPoints(polygon->points());
@@ -46,6 +58,45 @@ void SlippyMapLayerPolygon::copy(SlippyMapLayerObject *other)
     setStrokeColor(polygon->strokeColor());
     setFillColor(polygon->fillColor());
     setPosition(polygon->position());
+}
+
+void SlippyMapLayerPolygon::hydrateFromDatabase(const QJsonObject &json, const QString &geometry)
+{
+    QColor strokeColor(json["strokeColor"].toString());
+    setStrokeColor(strokeColor);
+    setStrokeWidth(json["strokeWidth"].toInt());
+
+    QColor fillColor(json["fillColor"].toString());
+    setFillColor(fillColor);
+
+    auto polygon = from_wkt<polygon_t>(geometry.toStdString());
+
+    m_points.clear();
+    for (auto it = boost::begin(exterior_ring(polygon)); it != boost::end(exterior_ring(polygon)); ++it) {
+        double x = get<0>(*it);
+        double y = get<1>(*it);
+        QPointF point(x, y);
+        m_points.append(point);
+    }
+
+    emit updated();
+}
+
+void SlippyMapLayerPolygon::saveToDatabase(QJsonObject &json, QString &geometry)
+{
+    json["strokeWidth"] = strokeWidth();
+    json["strokeColor"] = strokeColor().name(QColor::HexArgb);
+    json["fillColor"] = fillColor().name(QColor::HexArgb);
+
+    QStringList pointStrings;
+    for (const auto &point: m_points) {
+        pointStrings.append(QString("%1 %2")
+            .arg(point.x(), 0, 'f', 7)
+            .arg(point.y(), 0, 'f', 7));
+    }
+
+    geometry = QString("POLYGON((%1))")
+            .arg(pointStrings.join(", "));
 }
 
 SlippyMapLayerPolygon *SlippyMapLayerPolygon::clone() const
@@ -237,6 +288,7 @@ bool SlippyMapLayerPolygon::test_point(const QPointF& a, const QPointF& b, const
 
 QDataStream &SlippyMapLayerPolygon::serialize(QDataStream &stream) const
 {
+    stream << id();
     stream << label();
     stream << description();
     stream << position();
@@ -249,6 +301,7 @@ QDataStream &SlippyMapLayerPolygon::serialize(QDataStream &stream) const
 
 void SlippyMapLayerPolygon::unserialize(QDataStream &stream)
 {
+    QVariant id;
     QString label;
     QString description;
     QPointF position;
@@ -257,6 +310,7 @@ void SlippyMapLayerPolygon::unserialize(QDataStream &stream)
     QColor fillColor;
     QVector<QPointF> points;
 
+    stream >> id;
     stream >> label;
     stream >> description;
     stream >> position;
@@ -265,6 +319,7 @@ void SlippyMapLayerPolygon::unserialize(QDataStream &stream)
     stream >> fillColor;
     stream >> points;
 
+    setId(id);
     setLabel(label);
     setDescription(description);
     setPosition(position);

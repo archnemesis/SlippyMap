@@ -8,6 +8,7 @@
 #include <SlippyMap/SlippyMap.h>
 #include <QPainter>
 #include <QBrush>
+#include <QVariant>
 
 class SlippyMapLayerObjectPropertyPage;
 
@@ -36,6 +37,8 @@ namespace SlippyMap
         virtual QDataStream& serialize(QDataStream& stream) const = 0;
         virtual void unserialize(QDataStream& stream) = 0;
         virtual bool contains(const QPointF& point, int zoom) const = 0;
+        virtual void hydrateFromDatabase(const QJsonObject& json, const QString& geometry) = 0;
+        virtual void saveToDatabase(QJsonObject& json, QString& geometry) = 0;
         virtual bool isIntersectedBy(const QRectF& rect) const = 0;
         virtual bool isMovable();
         virtual bool isEditable();
@@ -43,14 +46,18 @@ namespace SlippyMap
         virtual void setPosition(const QPointF& position) = 0;
         virtual const QSizeF size() const = 0;
         virtual QString statusBarText();
+        QVariant id() const;
         QString label() const;
         QString description() const;
+        void setId(const QVariant& id);
         void setLabel(const QString& name);
         void setDescription(const QString& description);
         void setVisible(bool visible);
         void setEditable(bool editable);
+        void setSynced(bool synced);
         bool isVisible();
         bool isActive();
+        bool isSynced() const;
 
         /*
          * Drawing/Editing Support Methods
@@ -94,6 +101,7 @@ namespace SlippyMap
         void visibilityChanged();
 
     protected:
+        QVariant m_id;
         QString m_label;
         QString m_description;
         QBrush m_brush;
@@ -109,6 +117,7 @@ namespace SlippyMap
         bool m_visible = true;
         bool m_movable = true;
         bool m_editable = true;
+        bool m_synced = false;
         void drawResizeHandle(QPainter *painter, QPoint point) const;
     };
 }
