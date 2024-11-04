@@ -22,6 +22,7 @@ namespace SlippyMap
         QVariant id() const;
         QString name() const;
         QString description() const;
+        int order() const;
         bool isVisible();
         bool isEditable();
         bool isSynced();
@@ -31,6 +32,7 @@ namespace SlippyMap
         void setVisible(const bool visible);
         void setEditable(const bool editable);
         void setSynced(bool synced);
+        void setOrder(int order);
         bool contains(SlippyMapLayerObject *object);
         void replace(SlippyMapLayerObject *object, SlippyMapLayerObject *replacement);
         int indexOf(SlippyMapLayerObject *object);

@@ -79,6 +79,9 @@ void SlippyMapLayerPolygon::hydrateFromDatabase(const QJsonObject &json, const Q
         m_points.append(point);
     }
 
+    // we close the ring for PostGIS, but not needed for Qt
+    m_points.removeLast();
+
     emit updated();
 }
 
@@ -94,6 +97,11 @@ void SlippyMapLayerPolygon::saveToDatabase(QJsonObject &json, QString &geometry)
             .arg(point.x(), 0, 'f', 7)
             .arg(point.y(), 0, 'f', 7));
     }
+
+    // close the ring by copying the first point to the end
+    pointStrings.append(QString("%1 %2")
+        .arg(m_points.at(0).x(), 0, 'f', 7)
+        .arg(m_points.at(0).y(), 0, 'f', 7));
 
     geometry = QString("POLYGON((%1))")
             .arg(pointStrings.join(", "));

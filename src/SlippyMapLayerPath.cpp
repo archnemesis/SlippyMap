@@ -77,7 +77,7 @@ void SlippyMapLayerPath::hydrateFromDatabase(const QJsonObject &json, const QStr
     m_points.clear();
     for (auto it = boost::begin(linestring); it != boost::end(linestring); it++) {
         double x = get<0>(*it);
-        double y = get<0>(*it);
+        double y = get<1>(*it);
         QPointF point(x, y);
         m_points.append(point);
     }

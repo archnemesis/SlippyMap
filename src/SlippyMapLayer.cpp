@@ -40,6 +40,11 @@ QString SlippyMapLayer::description() const
     return m_description;
 }
 
+int SlippyMapLayer::order() const
+{
+    return m_zOrder;
+}
+
 bool SlippyMapLayer::isVisible()
 {
     return m_visible;
@@ -139,6 +144,11 @@ bool SlippyMapLayer::isSynced()
 void SlippyMapLayer::setSynced(bool synced)
 {
     m_synced = synced;
+}
+
+void SlippyMapLayer::setOrder(int order)
+{
+    m_zOrder = order;
 }
 
 QDataStream &operator<<(QDataStream &stream, const SlippyMapLayer *layer)
