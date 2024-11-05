@@ -369,9 +369,9 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
     QTransform m3(m1 * m2);
 
     if (m_layerManager != nullptr) {
-        for (SlippyMapLayer *layer : m_layerManager->layers()) {
+        for (const auto& layer : m_layerManager->layers()) {
             if (layer->isVisible()) {
-                for (SlippyMapLayerObject *obj : layer->objects()) {
+                for (const auto& obj: layer->objects()) {
                     if (obj->isVisible() && m_activeObject != obj) {
                         if (obj->isIntersectedBy(bbox)) {
                             obj->draw(&painter, m3, SlippyMapLayerObject::NormalState);
@@ -380,7 +380,7 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
                 }
 
                 // draw active things on top
-                for (SlippyMapLayerObject *obj : layer->objects()) {
+                for (const auto& obj: layer->objects()) {
                     if (obj->isVisible() && m_activeObject == obj) {
                         if (obj->isIntersectedBy(bbox)) {
                             obj->draw(&painter, m3, SlippyMapLayerObject::SelectedState);
@@ -573,9 +573,9 @@ void SlippyMapWidget::mousePressEvent(QMouseEvent *event)
         if (m_drawMode == NoDrawing) {
             setCursor(Qt::ClosedHandCursor);
 
-            for (auto *layer: m_layerManager->layers()) {
+            for (const auto& layer: m_layerManager->layers()) {
                 if (layer->isVisible()) {
-                    for (auto *object : layer->objects()) {
+                    for (const auto& object: layer->objects()) {
                         if (object->isVisible() && object->isMovable() && object->isEditable()) {
                             if (object->contains(mouseCoords, m_zoomLevel)) {
                                 m_dragObject = object;
@@ -627,8 +627,8 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
         if (m_drawMode == NoDrawing) {
             QPointF geoPos = widgetCoordsToGeoCoords(event->pos());
             if (m_layerManager != nullptr) {
-                for (SlippyMapLayer *layer : m_layerManager->layers()) {
-                    for (SlippyMapLayerObject *object : layer->objects()) {
+                for (const auto& layer : m_layerManager->layers()) {
+                    for (const auto& object: layer->objects()) {
                         if (layer->isVisible() && object->contains(geoPos, m_zoomLevel)) {
                             if (m_activeObject == object) return;
                             m_activeObject = object;
@@ -645,7 +645,7 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
                 // user clicked outside of any object, deselect currently
                 // selected object (if set)
                 if (m_activeObject != nullptr) {
-                    for (auto *layer : m_layerManager->layers()) {
+                    for (const auto& layer : m_layerManager->layers()) {
                         if (layer->contains(m_activeObject)) {
                             m_layerManager->deactivateActiveObject();
                             m_activeObject->setActive(false);
@@ -719,9 +719,9 @@ void SlippyMapWidget::mouseMoveEvent(QMouseEvent *event)
     if (m_drawMode == NoDrawing && !m_dragging) {
         Qt::CursorShape cursorShape = Qt::OpenHandCursor;
 
-        for (auto *layer : m_layerManager->layers()) {
+        for (const auto& layer : m_layerManager->layers()) {
             if (layer->isVisible()) {
-                for (auto *object : layer->objects()) {
+                for (const auto& object: layer->objects()) {
                     if (object->contains(mouseCoords, m_zoomLevel)) {
                         if (object == m_activeObject)
                             cursorShape = object->activeCursorShape(mouseCoords);
@@ -1310,9 +1310,9 @@ const QString &SlippyMapWidget::userAgent() const
     return m_userAgentString;
 }
 
-void SlippyMapWidget::setActiveObject(SlippyMapLayerObject *object)
+void SlippyMapWidget::setActiveObject(SlippyMapLayerObject::Ptr object)
 {
-    for (SlippyMapLayer *layer : m_layerManager->layers()) {
+    for (const auto& layer: m_layerManager->layers()) {
         if (layer->contains(object)) {
             m_activeObject = object;
             m_layerManager->setActiveLayer(layer);
@@ -1371,7 +1371,7 @@ void SlippyMapWidget::initDrawingStyle()
     m_lineStrokePen.setCosmetic(true);
 }
 
-void SlippyMapWidget::layerManagerObjectAdded(SlippyMapLayer *layer, SlippyMapLayerObject *object)
+void SlippyMapWidget::layerManagerObjectAdded(SlippyMapLayer::Ptr layer, SlippyMapLayerObject::Ptr object)
 {
     qDebug() << "Added layer object!";
     Q_UNUSED(layer)

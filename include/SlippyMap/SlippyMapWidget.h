@@ -2,6 +2,7 @@
 #define SLIPPYMAPWIDGET_H
 
 #include <SlippyMap/SlippyMap.h>
+#include <SlippyMap/SlippyMapLayer.h>
 
 #include <QWidget>
 #include <QPoint>
@@ -29,7 +30,6 @@ class QAction;
 class QClipboard;
 
 namespace SlippyMap {
-    class SlippyMapLayer;
     class SlippyMapLayerObject;
 }
 
@@ -101,7 +101,7 @@ namespace SlippyMap
         void setDrawingLineWidth(int width);
         void setUserAgent(const QString& userAgent);
         void takeLayer(SlippyMapWidgetLayer *layer);
-        void setActiveObject(SlippyMapLayerObject *object);
+        void setActiveObject(SlippyMapLayerObject::Ptr object);
 
     public slots:
         void decreaseZoomLevel();
@@ -114,7 +114,7 @@ namespace SlippyMap
 
     protected slots:
         void remap();
-        void layerManagerObjectAdded(SlippyMap::SlippyMapLayer *layer, SlippyMap::SlippyMapLayerObject *object);
+        void layerManagerObjectAdded(SlippyMap::SlippyMapLayer::Ptr layer, SlippyMap::SlippyMapLayerObject::Ptr object);
 
     protected:
         void paintEvent(QPaintEvent *event) override;
@@ -147,10 +147,10 @@ namespace SlippyMap
         void polygonSelected(const QList<QPointF>& points);
         void pathSelected(const QList<QPointF>& points);
         void drawModeChanged(DrawMode mode);
-        void objectActivated(SlippyMapLayerObject *object);
-        void objectDeactivated(SlippyMapLayerObject *object);
-        void objectDoubleClicked(SlippyMapLayerObject *object);
-        void objectWasDragged(SlippyMapLayerObject *object);
+        void objectActivated(SlippyMapLayerObject::Ptr object);
+        void objectDeactivated(SlippyMapLayerObject::Ptr object);
+        void objectDoubleClicked(SlippyMapLayerObject::Ptr object);
+        void objectWasDragged(SlippyMapLayerObject::Ptr object);
         void currentLocationButtonClicked();
 
     private:
@@ -263,8 +263,8 @@ namespace SlippyMap
         QPen m_linePen;
         QPen m_lineStrokePen;
         SlippyMapLayerManager *m_layerManager = nullptr;
-        SlippyMapLayerObject *m_activeObject = nullptr;
-        SlippyMapLayerObject *m_dragObject = nullptr;
+        SlippyMapLayerObject::Ptr m_activeObject = nullptr;
+        SlippyMapLayerObject::Ptr m_dragObject = nullptr;
         int m_drawingStrokeWidth = 2;
         int m_drawingLineWidth = 10;
     };

@@ -20,7 +20,7 @@ using namespace color_widgets;
 class SlippyMapLayerMarkerPropertyPage : public SlippyMapLayerObjectPropertyPage {
     Q_OBJECT
 public:
-    explicit SlippyMapLayerMarkerPropertyPage(SlippyMapLayerObject *object);
+    explicit SlippyMapLayerMarkerPropertyPage(const SlippyMap::SlippyMapLayerObject::Ptr& object);
     void save() override;
     QString tabTitle() override;
     void setupUi() override;

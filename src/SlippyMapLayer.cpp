@@ -10,22 +10,22 @@ SlippyMapLayer::SlippyMapLayer(QObject *parent) : QObject(parent)
 
 }
 
-void SlippyMapLayer::addObject(SlippyMapLayerObject *object)
+void SlippyMapLayer::addObject(SlippyMapLayerObject::Ptr object)
 {
     m_objects.append(object);
-    connect(object, &SlippyMapLayerObject::activeChanged, this, &SlippyMapLayer::objectChanged);
-    connect(object, &SlippyMapLayerObject::labelChanged, this, &SlippyMapLayer::objectChanged);
-    connect(object, &SlippyMapLayerObject::visibilityChanged, this, &SlippyMapLayer::objectChanged);
+    connect(object.get(), &SlippyMapLayerObject::activeChanged, this, &SlippyMapLayer::objectChanged);
+    connect(object.get(), &SlippyMapLayerObject::labelChanged, this, &SlippyMapLayer::objectChanged);
+    connect(object.get(), &SlippyMapLayerObject::visibilityChanged, this, &SlippyMapLayer::objectChanged);
     emit objectAdded(object);
 }
 
-void SlippyMapLayer::takeObject(SlippyMapLayerObject *object)
+void SlippyMapLayer::takeObject(SlippyMapLayerObject::Ptr object)
 {
     m_objects.removeOne(object);
     emit objectRemoved(object);
 }
 
-QList<SlippyMapLayerObject *> SlippyMapLayer::objects() const
+QList<SlippyMapLayerObject::Ptr> SlippyMapLayer::objects() const
 {
     return m_objects;
 }
@@ -65,49 +65,49 @@ void SlippyMapLayer::setVisible(const bool visible)
     m_visible = visible;
 }
 
-bool SlippyMapLayer::contains(SlippyMapLayerObject *object)
+bool SlippyMapLayer::contains(SlippyMapLayerObject::Ptr object)
 {
     return m_objects.contains(object);
 }
 
-int SlippyMapLayer::indexOf(SlippyMapLayerObject *object)
+int SlippyMapLayer::indexOf(SlippyMapLayerObject::Ptr object)
 {
     return m_objects.indexOf(object);
 }
 
 void SlippyMapLayer::deactivateAll()
 {
-    for (SlippyMapLayerObject *object : m_objects) {
+    for (const auto& object: m_objects) {
         object->setActive(false);
     }
 }
 
 void SlippyMapLayer::removeAll()
 {
-    for (SlippyMapLayerObject *object : m_objects) {
-        delete object;
-    }
-
     m_objects.clear();
 }
 
 void SlippyMapLayer::showAll()
 {
-    for (SlippyMapLayerObject *object : m_objects) {
+    for (const auto& object: m_objects) {
         object->setVisible(true);
     }
 }
 
 void SlippyMapLayer::hideAll()
 {
-    for (SlippyMapLayerObject *object : m_objects) {
+    for (const auto& object: m_objects) {
         object->setVisible(false);
     }
 }
 
 void SlippyMapLayer::objectChanged()
 {
-    emit objectUpdated(qobject_cast<SlippyMapLayerObject*>(sender()));
+    auto *ptr = qobject_cast<SlippyMapLayerObject*>(sender());
+    for (const auto& object: m_objects) {
+        if (object == ptr)
+            emit objectUpdated(object);
+    }
 }
 
 void SlippyMapLayer::setEditable(const bool editable)
@@ -120,7 +120,7 @@ bool SlippyMapLayer::isEditable()
     return m_editable;
 }
 
-void SlippyMapLayer::replace(SlippyMapLayerObject *object, SlippyMapLayerObject *replacement)
+void SlippyMapLayer::replace(SlippyMapLayerObject::Ptr object, SlippyMapLayerObject::Ptr replacement)
 {
     if (m_objects.contains(object))
         m_objects.replace(m_objects.indexOf(object), replacement);

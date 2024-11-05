@@ -15,8 +15,8 @@ namespace SlippyMap {
 class SlippyMapLayerObjectCommonPropertyPage : public SlippyMapLayerObjectPropertyPage
 {
 public:
-    explicit SlippyMapLayerObjectCommonPropertyPage(SlippyMap::SlippyMapLayerObject *object);
-    SlippyMapLayerObjectCommonPropertyPage(SlippyMapLayerObject *object, SlippyMapLayerManager *layerManager);
+    explicit SlippyMapLayerObjectCommonPropertyPage(SlippyMap::SlippyMapLayerObject::Ptr object);
+    SlippyMapLayerObjectCommonPropertyPage(SlippyMap::SlippyMapLayerObject::Ptr object, SlippyMapLayerManager *layerManager);
 
     QString tabTitle() override;
     void setupUi() override;

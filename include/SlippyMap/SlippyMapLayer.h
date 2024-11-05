@@ -2,6 +2,7 @@
 #define SLIPPYMAPLAYER_H
 
 #include <SlippyMap/SlippyMap.h>
+#include <SlippyMap/SlippyMapLayerObject.h>
 
 #include <QObject>
 #include <QList>
@@ -9,8 +10,6 @@
 
 namespace SlippyMap
 {
-    class SlippyMapLayerObject;
-
     class SLIPPYMAPSHARED_EXPORT SlippyMapLayer : public QObject
     {
         Q_OBJECT
@@ -19,9 +18,9 @@ namespace SlippyMap
 
         explicit SlippyMapLayer(QObject *parent = nullptr);
         ~SlippyMapLayer();
-        void addObject(SlippyMapLayerObject *object);
-        void takeObject(SlippyMapLayerObject *object);
-        QList<SlippyMapLayerObject*> objects() const;
+        void addObject(SlippyMapLayerObject::Ptr object);
+        void takeObject(SlippyMapLayerObject::Ptr object);
+        QList<SlippyMapLayerObject::Ptr> objects() const;
         QVariant id() const;
         QString name() const;
         QString description() const;
@@ -36,21 +35,21 @@ namespace SlippyMap
         void setEditable(const bool editable);
         void setSynced(bool synced);
         void setOrder(int order);
-        bool contains(SlippyMapLayerObject *object);
-        void replace(SlippyMapLayerObject *object, SlippyMapLayerObject *replacement);
-        int indexOf(SlippyMapLayerObject *object);
+        bool contains(SlippyMapLayerObject::Ptr object);
+        void replace(SlippyMapLayerObject::Ptr object, SlippyMapLayerObject::Ptr replacement);
+        int indexOf(SlippyMapLayerObject::Ptr object);
         void deactivateAll();
         void removeAll();
         void showAll();
         void hideAll();
 
     signals:
-        void objectAdded(SlippyMapLayerObject *object);
-        void objectRemoved(SlippyMapLayerObject *object);
-        void objectUpdated(SlippyMapLayerObject *object);
+        void objectAdded(SlippyMapLayerObject::Ptr object);
+        void objectRemoved(SlippyMapLayerObject::Ptr object);
+        void objectUpdated(SlippyMapLayerObject::Ptr object);
 
-        protected slots:
-            void objectChanged();
+    protected slots:
+        void objectChanged();
 
     protected:
         int m_zOrder = 0;
@@ -60,7 +59,7 @@ namespace SlippyMap
         QVariant m_id;
         QString m_name;
         QString m_description;
-        QList<SlippyMapLayerObject*> m_objects;
+        QList<SlippyMapLayerObject::Ptr> m_objects;
     };
 }
 

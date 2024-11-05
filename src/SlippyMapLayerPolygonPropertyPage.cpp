@@ -10,13 +10,13 @@
 #include <QPointF>
 #include <QListWidget>
 
-SlippyMapLayerPolygonPropertyPage::SlippyMapLayerPolygonPropertyPage(SlippyMapLayerObject *object):
+SlippyMapLayerPolygonPropertyPage::SlippyMapLayerPolygonPropertyPage(const SlippyMap::SlippyMapLayerObject::Ptr& object):
     SlippyMapLayerObjectPropertyPage(object),
     m_strokeWidth(nullptr),
     m_strokeColor(nullptr),
     m_fillColor(nullptr)
 {
-    m_polygon = qobject_cast<SlippyMapLayerPolygon*>(object);
+    m_polygon = qobject_cast<SlippyMapLayerPolygon*>(object.get());
 }
 
 
@@ -59,7 +59,7 @@ void SlippyMapLayerPolygonPropertyPage::updateUi()
 
 void SlippyMapLayerPolygonPropertyPage::save()
 {
-    auto *obj = qobject_cast<SlippyMapLayerPolygon*>(m_object);
+    auto *obj = qobject_cast<SlippyMapLayerPolygon*>(m_object.get());
     obj->setFillColor(QColor(m_fillColor->text()));
     obj->setStrokeColor(QColor(m_strokeColor->text()));
     obj->setStrokeWidth(m_strokeWidth->text().toInt());

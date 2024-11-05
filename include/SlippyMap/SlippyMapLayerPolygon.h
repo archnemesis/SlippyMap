@@ -15,6 +15,8 @@ namespace SlippyMap {
     {
         Q_OBJECT
     public:
+        typedef QSharedPointer<SlippyMapLayerPolygon> Ptr;
+
         explicit Q_INVOKABLE SlippyMapLayerPolygon(QObject *parent = nullptr);
         explicit SlippyMapLayerPolygon(const QVector<QPointF>& points, QObject *parent = nullptr);
         Q_INVOKABLE SlippyMapLayerPolygon(const SlippyMap::SlippyMapLayerPolygon& other);
@@ -29,7 +31,7 @@ namespace SlippyMap {
         void unserialize(QDataStream& stream) override;
         void hydrateFromDatabase(const QJsonObject& json, const QString& geometry) override;
         void saveToDatabase(QJsonObject& json, QString& geometry) override;
-        QList<SlippyMapLayerObjectPropertyPage*> propertyPages() const;
+        QList<SlippyMapLayerObjectPropertyPage*> propertyPages(SlippyMapLayerObject::Ptr object) const;
         bool contains(const QPointF& point, int zoom) const override;
         bool isIntersectedBy(const QRectF& rect) const override;
         const QPointF position() const override;

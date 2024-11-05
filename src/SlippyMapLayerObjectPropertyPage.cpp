@@ -5,7 +5,7 @@
 #include <QComboBox>
 
 
-SlippyMapLayerObjectPropertyPage::SlippyMapLayerObjectPropertyPage(SlippyMapLayerObject *object) :
+SlippyMapLayerObjectPropertyPage::SlippyMapLayerObjectPropertyPage(const SlippyMapLayerObject::Ptr& object) :
     QWidget()
 {
     m_object = object;

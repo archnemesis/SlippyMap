@@ -358,9 +358,11 @@ void SlippyMapLayerPolygon::setFillColor(const QColor &color)
     emit updated();
 }
 
-QList<SlippyMapLayerObjectPropertyPage*> SlippyMapLayerPolygon::propertyPages() const
+QList<SlippyMapLayerObjectPropertyPage*> SlippyMapLayerPolygon::propertyPages(
+        SlippyMapLayerObject::Ptr object
+        ) const
 {
-    return {new SlippyMapLayerPolygonPropertyPage((SlippyMapLayerObject *) this)};
+    return {new SlippyMapLayerPolygonPropertyPage(object)};
 }
 
 QList<QRectF> SlippyMapLayerPolygon::resizeHandles(const QTransform& transform) const

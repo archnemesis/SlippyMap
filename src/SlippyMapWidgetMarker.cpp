@@ -1,6 +1,7 @@
 #include "SlippyMap/SlippyMapWidgetMarker.h"
 #include "SlippyMap/SlippyMapLayerMarkerPropertyPage.h"
 
+#include <QDebug>
 #include <QPainter>
 #include <QPoint>
 #include <QBrush>
@@ -331,12 +332,19 @@ void SlippyMapWidgetMarker::initStyle()
     m_labelTextPen.setColor(systemPalette.text().color());
 }
 
-QList<SlippyMapLayerObjectPropertyPage*> SlippyMapWidgetMarker::propertyPages() const
+QList<SlippyMapLayerObjectPropertyPage*> SlippyMapWidgetMarker::propertyPages(
+        SlippyMapLayerObject::Ptr object
+        ) const
 {
-    return {new SlippyMapLayerMarkerPropertyPage((SlippyMapLayerObject *) this)};
+    return {new SlippyMapLayerMarkerPropertyPage(object)};
 }
 
 SlippyMapLayerObject *SlippyMapWidgetMarker::clone() const
 {
     return new SlippyMapWidgetMarker(*this);
+}
+
+SlippyMapWidgetMarker::~SlippyMapWidgetMarker()
+{
+    qDebug() << "Deleting marker!";
 }

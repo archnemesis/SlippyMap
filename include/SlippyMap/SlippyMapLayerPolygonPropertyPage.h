@@ -12,7 +12,7 @@ class QListWidget;
 class SlippyMapLayerPolygonPropertyPage : public SlippyMapLayerObjectPropertyPage
 {
 public:
-    explicit SlippyMapLayerPolygonPropertyPage(SlippyMapLayerObject *object);
+    explicit SlippyMapLayerPolygonPropertyPage(const SlippyMap::SlippyMapLayerObject::Ptr& object);
     virtual QString tabTitle();
     void setupUi() override;
     void save() override;

@@ -2,6 +2,9 @@
 #define SLIPPYMAPLAYERMANAGER_H
 
 #include <SlippyMap/SlippyMap.h>
+#include <SlippyMap/SlippyMapLayer.h>
+#include <SlippyMap/SlippyMapAnimatedLayer.h>
+#include <SlippyMap/SlippyMapLayerObject.h>
 
 #include <QAbstractItemModel>
 #include <QList>
@@ -9,9 +12,7 @@
 
 namespace SlippyMap
 {
-    class SlippyMapLayer;
     class SlippyMapLayerObject;
-    class SlippyMapAnimatedLayer;
 
     class SLIPPYMAPSHARED_EXPORT SlippyMapLayerManager : public QAbstractItemModel
     {
@@ -26,46 +27,46 @@ namespace SlippyMap
         QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
-        void addLayer(SlippyMapLayer *layer);
-        void addLayerObject(SlippyMapLayer *layer, SlippyMapLayerObject *object);
-        void addLayerObject(SlippyMapLayerObject *object);
-        void removeLayerObject(SlippyMapLayer *layer, SlippyMapLayerObject *object);
-        void removeLayerObjects(SlippyMapLayer *layer);
-        void replaceObject(SlippyMapLayerObject *object, SlippyMapLayerObject *replacement);
-        void takeLayer(SlippyMapLayer *layer);
-        void setActiveLayer(SlippyMapLayer *layer);
-        void setDefaultLayer(SlippyMapLayer *layer);
+        void addLayer(SlippyMapLayer::Ptr layer);
+        void addLayerObject(SlippyMapLayer::Ptr layer, const SlippyMapLayerObject::Ptr& object);
+        void addLayerObject(const SlippyMapLayerObject::Ptr& object);
+        void removeLayerObject(const SlippyMapLayer::Ptr& layer, const SlippyMapLayerObject::Ptr& object);
+        void removeLayerObjects(SlippyMapLayer::Ptr layer);
+        void replaceObject(const SlippyMapLayerObject::Ptr& object, SlippyMapLayerObject::Ptr replacement);
+        void takeLayer(SlippyMapLayer::Ptr layer);
+        void setActiveLayer(SlippyMapLayer::Ptr layer);
+        void setDefaultLayer(SlippyMapLayer::Ptr layer);
         void deactivateActiveObject();
         void updateActiveLayer();
         void saveToFile(QString fileName);
 
         int objectCount() const;
-        bool contains(SlippyMapLayerObject *object);
-        bool containsLayer(SlippyMapLayer *layer);
+        bool contains(const SlippyMapLayerObject::Ptr& object);
+        bool containsLayer(SlippyMapLayer::Ptr layer);
 
-        QList<SlippyMapLayer*> layers();
-        SlippyMapLayer *activeLayer();
-        SlippyMapLayer *defaultLayer();
-        QList<SlippyMapLayerObject*> objectsAtPoint(QPointF point, int zoomLevel);
+        QList<SlippyMapLayer::Ptr> layers();
+        SlippyMapLayer::Ptr activeLayer();
+        SlippyMapLayer::Ptr defaultLayer();
+        QList<SlippyMapLayerObject::Ptr> objectsAtPoint(QPointF point, int zoomLevel);
 
     signals:
-        void activeLayerChanged(SlippyMapLayer *layer);
-        void layerAdded(SlippyMapLayer *layer);
-        void layerRemoved(SlippyMapLayer *layer);
-        void layerObjectAdded(SlippyMapLayer *layer, SlippyMapLayerObject *object);
-        void layerObjectRemoved(SlippyMapLayer *layer, SlippyMapLayerObject *object);
-        void layerObjectUpdated(SlippyMapLayerObject* object);
+        void activeLayerChanged(SlippyMapLayer::Ptr layer);
+        void layerAdded(SlippyMapLayer::Ptr layer);
+        void layerRemoved(SlippyMapLayer::Ptr layer);
+        void layerObjectAdded(SlippyMapLayer::Ptr layer, const SlippyMapLayerObject::Ptr& object);
+        void layerObjectRemoved(SlippyMapLayer::Ptr layer, const SlippyMapLayerObject::Ptr& object);
+        void layerObjectUpdated(const SlippyMapLayerObject::Ptr& object);
     protected:
-        QList<SlippyMapLayer*> m_layers;
-        QList<SlippyMapAnimatedLayer*> m_animatedLayers;
-        SlippyMapLayer *m_activeLayer = nullptr;
-        SlippyMapLayer *m_defaultLayer = nullptr;
+        QList<SlippyMapLayer::Ptr> m_layers;
+        QList<SlippyMapAnimatedLayer::Ptr> m_animatedLayers;
+        SlippyMapLayer::Ptr m_activeLayer = nullptr;
+        SlippyMapLayer::Ptr m_defaultLayer = nullptr;
         QFont m_hiddenFont;
         QFont m_activeFont;
 
     protected slots:
-        void layer_onObjectAdded(SlippyMapLayerObject *object);
-        void layer_onObjectUpdated(SlippyMapLayerObject *object);
+        void layer_onObjectAdded(const SlippyMapLayerObject::Ptr& object);
+        void layer_onObjectUpdated(const SlippyMapLayerObject::Ptr& object);
     };
 }
 

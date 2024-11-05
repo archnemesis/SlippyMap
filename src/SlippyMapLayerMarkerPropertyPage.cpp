@@ -15,7 +15,7 @@
 #include <QCheckBox>
 
 
-SlippyMapLayerMarkerPropertyPage::SlippyMapLayerMarkerPropertyPage(SlippyMapLayerObject *object) :
+SlippyMapLayerMarkerPropertyPage::SlippyMapLayerMarkerPropertyPage(const SlippyMap::SlippyMapLayerObject::Ptr& object) :
     SlippyMapLayerObjectPropertyPage(object) {
 }
 
@@ -30,7 +30,7 @@ void SlippyMapLayerMarkerPropertyPage::setupUi()
         m_color->setEnabled(false);
     }
 
-    auto *marker = qobject_cast<SlippyMapWidgetMarker*>(m_object);
+    auto *marker = qobject_cast<SlippyMapWidgetMarker*>(m_object.get());
 
     m_color->setColor(marker->color());
     m_radius->setText(QString("%1").arg(marker->radius()));
@@ -44,14 +44,14 @@ void SlippyMapLayerMarkerPropertyPage::setupUi()
 
 void SlippyMapLayerMarkerPropertyPage::updateUi()
 {
-    auto *marker = qobject_cast<SlippyMapWidgetMarker*>(m_object);
+    auto *marker = qobject_cast<SlippyMapWidgetMarker*>(m_object.get());
     m_color->setColor(marker->color());
     m_radius->setText(QString("%1").arg(marker->radius()));
 }
 
 void SlippyMapLayerMarkerPropertyPage::save()
 {
-    auto *obj = qobject_cast<SlippyMapWidgetMarker*>(m_object);
+    auto *obj = qobject_cast<SlippyMapWidgetMarker*>(m_object.get());
     QColor newColor = m_color->color();
     obj->setColor(newColor);
     obj->setRadius(m_radius->text().toInt());

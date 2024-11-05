@@ -29,9 +29,12 @@ namespace SlippyMap
         Q_PROPERTY(bool editable MEMBER m_editable READ isEditable)
 
     public:
+        typedef QSharedPointer<SlippyMapWidgetMarker> Ptr;
+
         explicit Q_INVOKABLE SlippyMapWidgetMarker(QObject *parent = nullptr);
         explicit SlippyMapWidgetMarker(const QPointF &position, QObject *parent = nullptr);
         Q_INVOKABLE SlippyMapWidgetMarker(const SlippyMap::SlippyMapWidgetMarker& other);
+        ~SlippyMapWidgetMarker();
         virtual SlippyMapLayerObject* clone() const;
         virtual void copy(SlippyMapLayerObject* other);
         void draw(QPainter *painter, const QTransform &transform, ObjectState state) override;
@@ -49,7 +52,7 @@ namespace SlippyMap
         const QColor& color() const;
         const QImage& icon() const;
         int radius() const;
-        QList<SlippyMapLayerObjectPropertyPage*> propertyPages() const;
+        QList<SlippyMapLayerObjectPropertyPage*> propertyPages(SlippyMapLayerObject::Ptr object) const;
         QDataStream& serialize(QDataStream& stream) const override;
         void unserialize(QDataStream& stream) override;
         virtual void hydrateFromDatabase(const QJsonObject& json, const QString& geometry) override;

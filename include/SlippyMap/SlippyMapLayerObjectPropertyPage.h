@@ -17,7 +17,7 @@ class SlippyMapLayerObjectPropertyPage : public QWidget
 {
     Q_OBJECT
 public:
-    explicit SlippyMapLayerObjectPropertyPage(SlippyMapLayerObject *object);
+    explicit SlippyMapLayerObjectPropertyPage(const SlippyMapLayerObject::Ptr& object);
     ~SlippyMapLayerObjectPropertyPage() override;
     virtual QString tabTitle() = 0;
     virtual void save() = 0;
@@ -28,7 +28,7 @@ public slots:
 
 protected:
 
-    SlippyMapLayerObject *m_object;
+    SlippyMapLayerObject::Ptr m_object;
 };
 
 #endif // SLIPPYMAPSHAPEPROPERTYPAGE_H

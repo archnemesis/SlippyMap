@@ -14,16 +14,16 @@
 #include <QComboBox>
 
 SlippyMapLayerObjectCommonPropertyPage::SlippyMapLayerObjectCommonPropertyPage(
-    SlippyMap::SlippyMapLayerObject *object) :
+    SlippyMap::SlippyMapLayerObject::Ptr object) :
     SlippyMapLayerObjectPropertyPage(object)
 {
 }
 
 SlippyMapLayerObjectCommonPropertyPage::SlippyMapLayerObjectCommonPropertyPage(
-    SlippyMapLayerObject *object,
-    SlippyMapLayerManager *layerManager) :
-    SlippyMapLayerObjectPropertyPage(object),
-    m_layerManager(layerManager)
+        SlippyMap::SlippyMapLayerObject::Ptr object,
+        SlippyMapLayerManager *layerManager) :
+        SlippyMapLayerObjectPropertyPage(object),
+        m_layerManager(layerManager)
 {
 }
 
@@ -45,8 +45,8 @@ void SlippyMapLayerObjectCommonPropertyPage::save()
 
     int selectedLayerIndex = m_layerComboBox->currentIndex();
     int layerIndex = 0;
-    SlippyMapLayer *parentLayer = nullptr;
-    for (auto *layer : m_layerManager->layers()) {
+    SlippyMapLayer::Ptr parentLayer;
+    for (const auto& layer: m_layerManager->layers()) {
         if (layer->isEditable()) {
             if (layer->contains(m_object)) {
                 parentLayer = layer;
@@ -61,7 +61,7 @@ void SlippyMapLayerObjectCommonPropertyPage::save()
     if (selectedLayerIndex != layerIndex) {
         m_layerManager->removeLayerObject(parentLayer, m_object);
         int newLayerIndex = 0;
-        for (auto *layer : m_layerManager->layers()) {
+        for (const auto& layer: m_layerManager->layers()) {
             if (layer->isEditable()) {
                 if (newLayerIndex == selectedLayerIndex) {
                     m_layerManager->addLayerObject(layer, m_object);
@@ -83,14 +83,14 @@ void SlippyMapLayerObjectCommonPropertyPage::setupUi()
     m_layerComboBox = new QComboBox();
 
     if (m_layerManager) {
-        for (auto *layer : m_layerManager->layers()) {
+        for (const auto& layer : m_layerManager->layers()) {
             if (layer->isEditable())
                 m_layerComboBox->addItem(layer->name());
         }
     }
 
     int layerIndex = 0;
-    for (auto *layer : m_layerManager->layers()) {
+    for (const auto& layer : m_layerManager->layers()) {
         if (layer->isEditable()) {
             if (layer->contains(m_object)) {
                 m_layerComboBox->setCurrentIndex(layerIndex);

@@ -344,7 +344,7 @@ const QColor &SlippyMapLayerPath::strokeColor() const
     return m_strokeColor;
 }
 
-QList<SlippyMapLayerObjectPropertyPage *> SlippyMapLayerPath::propertyPages() const
+QList<SlippyMapLayerObjectPropertyPage *> SlippyMapLayerPath::propertyPages(SlippyMapLayerObject::Ptr object) const
 {
     return {};
 }
