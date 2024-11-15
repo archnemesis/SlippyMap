@@ -61,7 +61,6 @@ namespace SlippyMap
         bool isVisible();
         bool isActive();
         bool isSynced() const;
-
         /*
          * Drawing/Editing Support Methods
          */

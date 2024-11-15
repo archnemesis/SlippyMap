@@ -162,5 +162,3 @@ bool SlippyMapLayerObject::isSynced() const
     return m_synced;
 }
 
-
-

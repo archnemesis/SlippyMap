@@ -3,8 +3,10 @@
 
 #include <SlippyMap/SlippyMapLayerObjectPropertyPage.h>
 #include <SlippyMap/SlippyMapLayerPolygon.h>
+#include <QtColorWidgets/ColorSelector>
 
 using namespace SlippyMap;
+using namespace color_widgets;
 
 class QLineEdit;
 class QListWidget;
@@ -23,9 +25,9 @@ public slots:
 protected:
 
     SlippyMapLayerPolygon *m_polygon;
-    QLineEdit *m_strokeColor;
+    ColorSelector *m_strokeColor;
     QLineEdit *m_strokeWidth;
-    QLineEdit *m_fillColor;
+    ColorSelector *m_fillColor;
     QListWidget *m_pointList;
 };
 

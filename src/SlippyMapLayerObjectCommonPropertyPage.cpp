@@ -118,7 +118,7 @@ void SlippyMapLayerObjectCommonPropertyPage::setupUi()
     m_visibility->setChecked(m_object->isVisible());
 
     auto *mainPropertiesLayout = new QFormLayout();
-
+    mainPropertiesLayout->setSpacing(10);
     mainPropertiesLayout->addRow(tr("Label"), m_label);
     mainPropertiesLayout->addRow(tr("Description"), m_description);
     mainPropertiesLayout->addRow(tr("Latitude"), m_latitude);
@@ -126,7 +126,13 @@ void SlippyMapLayerObjectCommonPropertyPage::setupUi()
     mainPropertiesLayout->addRow(tr("Layer"), m_layerComboBox);
     mainPropertiesLayout->addRow("", m_visibility);
 
-    setLayout(mainPropertiesLayout);
+    auto *vlayout = new QVBoxLayout();
+    vlayout->addLayout(mainPropertiesLayout);
+    vlayout->addStretch();
+    vlayout->setContentsMargins(10, 10, 10, 10);
+    vlayout->setSpacing(0);
+
+    setLayout(vlayout);
 }
 
 void SlippyMapLayerObjectCommonPropertyPage::updateUi()

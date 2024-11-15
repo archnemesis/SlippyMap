@@ -156,6 +156,16 @@ SlippyMapLayer::~SlippyMapLayer()
     qDebug() << "Layer" << name() << "deleted";
 }
 
+void SlippyMapLayer::setColor(const QColor &color)
+{
+    m_color = color;
+}
+
+const QColor &SlippyMapLayer::color() const
+{
+    return m_color;
+}
+
 QDataStream &operator<<(QDataStream &stream, const SlippyMapLayer *layer)
 {
     stream << layer->id();

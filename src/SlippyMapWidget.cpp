@@ -228,6 +228,11 @@ void SlippyMapWidget::setLayerManager(SlippyMapLayerManager *manager)
         update();
     });
     connect(m_layerManager,
+            &SlippyMapLayerManager::layerUpdated,
+            [this]() {
+        update();
+    });
+    connect(m_layerManager,
             &SlippyMapLayerManager::layerObjectAdded,
             this,
             &SlippyMapWidget::layerManagerObjectAdded);
@@ -368,6 +373,8 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
     m2.scale(1.0/degPerPixelX(), -(1.0/degPerPixelY()));
     QTransform m3(m1 * m2);
 
+    m_visibleObjects.clear();
+
     if (m_layerManager != nullptr) {
         for (const auto& layer : m_layerManager->layers()) {
             if (layer->isVisible()) {
@@ -375,6 +382,7 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
                     if (obj->isVisible() && m_activeObject != obj) {
                         if (obj->isIntersectedBy(bbox)) {
                             obj->draw(&painter, m3, SlippyMapLayerObject::NormalState);
+                            m_visibleObjects.append(obj);
                         }
                     }
                 }
@@ -384,11 +392,14 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
                     if (obj->isVisible() && m_activeObject == obj) {
                         if (obj->isIntersectedBy(bbox)) {
                             obj->draw(&painter, m3, SlippyMapLayerObject::SelectedState);
+                            m_visibleObjects.append(obj);
                         }
                     }
                 }
             }
         }
+
+        //m_layerManager->setVisbleObjectsList(m_visibleObjects);
     }
 
     /* ----- Dragging and Drawing ----- */
@@ -499,6 +510,18 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
             layer->drawOverlay(painter, rect());
         }
     }
+
+    /* ----- Crosshairs ----- */
+    if (m_crosshairsEnabled) {
+        painter.setPen(Qt::black);
+        painter.setBrush(Qt::NoBrush);
+        painter.drawLine(
+                m_cursorPixelPosition.x(), 0,
+                m_cursorPixelPosition.x(), x() + height());
+        painter.drawLine(
+                0, m_cursorPixelPosition.y(),
+                y() + width(), m_cursorPixelPosition.y());
+    }
 }
 
 bool SlippyMapWidget::event(QEvent *event)
@@ -573,24 +596,39 @@ void SlippyMapWidget::mousePressEvent(QMouseEvent *event)
         if (m_drawMode == NoDrawing) {
             setCursor(Qt::ClosedHandCursor);
 
-            for (const auto& layer: m_layerManager->layers()) {
-                if (layer->isVisible()) {
-                    for (const auto& object: layer->objects()) {
-                        if (object->isVisible() && object->isMovable() && object->isEditable()) {
-                            if (object->contains(mouseCoords, m_zoomLevel)) {
-                                m_dragObject = object;
-                                m_activeObject = object;
-                                m_layerManager->setActiveLayer(layer);
-                                m_layerManager->deactivateActiveObject();
-                                object->setActive(true);
-                                emit objectActivated(object);
-                                update();
-                                break;
-                            }
-                        }
+            for (const auto& object: m_visibleObjects) {
+                if (object->isMovable() && object->isEditable()) {
+                    if (object->contains(mouseCoords, m_zoomLevel)) {
+                        m_dragObject = object;
+                        m_activeObject = object;
+                        m_layerManager->setActiveLayer(m_layerManager->layerForObject(object));
+                        m_layerManager->deactivateActiveObject();
+                        object->setActive(true);
+                        emit objectActivated(object);
+                        update();
+                        break;
                     }
                 }
             }
+
+//            for (const auto& layer: m_layerManager->layers()) {
+//                if (layer->isVisible()) {
+//                    for (const auto& object: layer->objects()) {
+//                        if (object->isVisible() && object->isMovable() && object->isEditable()) {
+//                            if (object->contains(mouseCoords, m_zoomLevel)) {
+//                                m_dragObject = object;
+//                                m_activeObject = object;
+//                                m_layerManager->setActiveLayer(layer);
+//                                m_layerManager->deactivateActiveObject();
+//                                object->setActive(true);
+//                                emit objectActivated(object);
+//                                update();
+//                                break;
+//                            }
+//                        }
+//                    }
+//                }
+//            }
         }
         else {
             switch (m_drawMode) {
@@ -627,18 +665,31 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
         if (m_drawMode == NoDrawing) {
             QPointF geoPos = widgetCoordsToGeoCoords(event->pos());
             if (m_layerManager != nullptr) {
-                for (const auto& layer : m_layerManager->layers()) {
-                    for (const auto& object: layer->objects()) {
-                        if (layer->isVisible() && object->contains(geoPos, m_zoomLevel)) {
-                            if (m_activeObject == object) return;
-                            m_activeObject = object;
-                            m_layerManager->setActiveLayer(layer);
-                            m_layerManager->deactivateActiveObject();
-                            object->setActive(true);
-                            emit objectActivated(object);
-                            update();
-                            return;
-                        }
+//                for (const auto& layer : m_layerManager->layers()) {
+//                    for (const auto& object: layer->objects()) {
+//                        if (layer->isVisible() && object->contains(geoPos, m_zoomLevel)) {
+//                            if (m_activeObject == object) return;
+//                            m_activeObject = object;
+//                            m_layerManager->setActiveLayer(layer);
+//                            m_layerManager->deactivateActiveObject();
+//                            object->setActive(true);
+//                            emit objectActivated(object);
+//                            update();
+//                            return;
+//                        }
+//                    }
+//                }
+
+                for (const auto& object: m_visibleObjects) {
+                    if (object->contains(geoPos, m_zoomLevel)) {
+                        if (m_activeObject == object) return;
+                        m_activeObject = object;
+                        m_layerManager->setActiveLayer(m_layerManager->layerForObject(object));
+                        m_layerManager->deactivateActiveObject();
+                        object->setActive(true);
+                        emit objectActivated(object);
+                        update();
+                        return;
                     }
                 }
 
@@ -664,6 +715,15 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
             setCursor(Qt::OpenHandCursor);
             return;
         }
+        // marker is single-click select
+        else if (m_drawMode == MarkerDrawing) {
+            QPointF geoPos = widgetCoordsToGeoCoords(event->pos());
+            m_drawMode = NoDrawing;
+            emit drawModeChanged(NoDrawing);
+            emit pointSelected(geoPos);
+            setCursor(Qt::ArrowCursor);
+            update();
+        }
         // a polygon goes until a double-click event
         else if (m_drawMode != PolygonDrawing && m_drawMode != PathDrawing) {
             m_drawMode = NoDrawing;
@@ -685,6 +745,9 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
             case PolygonDrawing:
                 // do nothing and don't stop drawing
                 return;
+            case MarkerDrawing: {
+                break;
+            }
             default:
                 break;
         }
@@ -780,6 +843,11 @@ void SlippyMapWidget::mouseMoveEvent(QMouseEvent *event)
         }
     }
 
+    if (m_crosshairsEnabled) {
+        m_cursorPixelPosition = event->pos();
+        repaint();
+    }
+
     emit cursorPositionChanged(widgetY2lat(event->pos().y()), widgetX2long(event->pos().x()));
 }
 
@@ -810,6 +878,7 @@ void SlippyMapWidget::wheelEvent(QWheelEvent *event)
             }
 
             remap();
+            update();
             emit zoomLevelChanged(m_zoomLevel);
         }
     }
@@ -817,6 +886,7 @@ void SlippyMapWidget::wheelEvent(QWheelEvent *event)
         if (m_zoomLevel > m_minZoom) {
             m_zoomLevel--;
             remap();
+            update();
             emit zoomLevelChanged(m_zoomLevel);
         }
     }
@@ -1062,8 +1132,11 @@ void SlippyMapWidget::remap()
     qint32 startX = centerX - 128 - ((tiles_wide / 2) * 256) + diff_pix_x;
     qint32 startY = centerY - 128 - ((tiles_high / 2) * 256) - diff_pix_y;
 
+    int tiles_to_load = 0;
+
     for (SlippyMapWidgetLayer *layer : m_layers) {
         QList<Tile*> deleteList(m_layerTileMaps[layer]);
+
 
         if (layer->isVisible()) {
             for (int y = 0; y < tiles_high; y++) {
@@ -1139,6 +1212,7 @@ void SlippyMapWidget::remap()
                             update();
                         }
                         else {
+                            tiles_to_load++;
                             QNetworkRequest req(tileUrl);
                             req.setRawHeader(QByteArray("User-Agent"), m_userAgentString.toLocal8Bit());
                             req.setSslConfiguration(QSslConfiguration::defaultConfiguration());
@@ -1169,6 +1243,8 @@ void SlippyMapWidget::remap()
                                 }
 
                                 QByteArray data = reply->readAll();
+                                QPixmap pixmap;
+                                pixmap.loadFromData(data);
 
                                 if (layer->cacheDuration() > 0) {
                                     QFile cacheFile(cachedFileName);
@@ -1184,8 +1260,6 @@ void SlippyMapWidget::remap()
                                     delete tile;
                                 }
                                 else {
-                                    QPixmap pixmap;
-                                    pixmap.loadFromData(data);
                                     tile->setPixmap(pixmap);
                                     tile->setPendingReply(nullptr);
                                     update();
@@ -1225,6 +1299,8 @@ void SlippyMapWidget::remap()
             }
         }
     }
+
+    emit tileRequestPending(tiles_to_load);
 }
 
 QPixmap SlippyMapWidget::drawLegend(SlippyMapWidgetLayer *layer, int width, int height)
@@ -1377,4 +1453,9 @@ void SlippyMapWidget::layerManagerObjectAdded(SlippyMapLayer::Ptr layer, SlippyM
     Q_UNUSED(layer)
     Q_UNUSED(object)
     update();
+}
+
+void SlippyMapWidget::setCrosshairsEnabled(bool enabled)
+{
+    m_crosshairsEnabled = enabled;
 }
