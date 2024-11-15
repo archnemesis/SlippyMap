@@ -28,6 +28,7 @@ namespace SlippyMap
         bool isVisible();
         bool isEditable();
         bool isSynced();
+        const QColor& color() const;
         void setId(const QVariant& id);
         void setName(const QString &name);
         void setDescription(const QString &description);
@@ -35,6 +36,7 @@ namespace SlippyMap
         void setEditable(const bool editable);
         void setSynced(bool synced);
         void setOrder(int order);
+        void setColor(const QColor& color);
         bool contains(SlippyMapLayerObject::Ptr object);
         void replace(SlippyMapLayerObject::Ptr object, SlippyMapLayerObject::Ptr replacement);
         int indexOf(SlippyMapLayerObject::Ptr object);
@@ -59,6 +61,7 @@ namespace SlippyMap
         QVariant m_id;
         QString m_name;
         QString m_description;
+        QColor m_color;
         QList<SlippyMapLayerObject::Ptr> m_objects;
     };
 }

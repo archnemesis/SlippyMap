@@ -60,6 +60,7 @@ namespace SlippyMap
         };
 
         enum DrawMode {
+            MarkerDrawing,
             PathDrawing,
             NoDrawing,
             RectDrawing,
@@ -102,6 +103,7 @@ namespace SlippyMap
         void setUserAgent(const QString& userAgent);
         void takeLayer(SlippyMapWidgetLayer *layer);
         void setActiveObject(SlippyMapLayerObject::Ptr object);
+        void setCrosshairsEnabled(bool enabled);
 
     public slots:
         void decreaseZoomLevel();
@@ -137,6 +139,7 @@ namespace SlippyMap
         void zoomLevelChanged(int zoom);
         void tileRequestInitiated();
         void tileRequestFinished();
+        void tileRequestPending(int tiles);
         void cursorPositionChanged(double latitude, double longitude);
         void cursorLeft();
         void cursorEntered();
@@ -146,6 +149,7 @@ namespace SlippyMap
         void ellipseSelected(const QRect &rect);
         void polygonSelected(const QList<QPointF>& points);
         void pathSelected(const QList<QPointF>& points);
+        void pointSelected(const QPointF& point);
         void drawModeChanged(DrawMode mode);
         void objectActivated(SlippyMapLayerObject::Ptr object);
         void objectDeactivated(SlippyMapLayerObject::Ptr object);
@@ -206,6 +210,7 @@ namespace SlippyMap
         QList<LineSet*> m_lineSets;
         QList<SlippyMapWidgetLayer*> m_expiredLayers;
         QList<SlippyMapWidgetLayer*> m_layers;
+        QList<SlippyMapLayerObject::Ptr> m_visibleObjects;
         QMap<LineSet*,QVector<QLineF>> m_lineSetPaths;
         QMap<SlippyMapWidgetLayer*,QList<Tile*>> m_layerTileMaps;
         QMap<SlippyMapWidgetLayer*,QPixmap> m_layerLegends;
@@ -221,12 +226,14 @@ namespace SlippyMap
         QPoint m_dragRealStart;
         QPoint m_dragStart;
         QPointF m_drawPolygonEndPosition;
+        QPoint m_cursorPixelPosition;
         QRegularExpression m_locationParser;
         QSize m_legendMargins;
         Qt::Alignment m_legendAlignment;
         Qt::MouseButton m_dragButton;
         bool m_dragging = false;
         bool m_dragStarted = false;
+        bool m_crosshairsEnabled = false;
         double m_lat;
         double m_lon;
         int m_legendSpacing;

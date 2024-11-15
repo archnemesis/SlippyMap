@@ -275,6 +275,7 @@ void SlippyMapWidgetMarker::setColor(const QColor &color)
 void SlippyMapWidgetMarker::setRadius(int radius)
 {
     m_radius = radius;
+    initStyle();
     emit updated();
 }
 

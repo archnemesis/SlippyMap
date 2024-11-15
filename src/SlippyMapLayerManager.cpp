@@ -10,7 +10,6 @@ using namespace SlippyMap;
 
 SlippyMapLayerManager::SlippyMapLayerManager(QObject *parent) : QAbstractItemModel(parent)
 {
-    //m_hiddenFont.setItalic(true);
     m_activeFont.setBold(true);
 }
 
@@ -52,18 +51,6 @@ QModelIndex SlippyMapLayerManager::parent(const QModelIndex &index) const
             return QModelIndex();
     }
 
-    SlippyMapLayerObject *obj = static_cast<SlippyMapLayerObject*>(index.internalPointer());
-
-    for (auto &layer : m_layers) {
-        for (const auto& object: layer->objects()) {
-            if (object == obj)
-                return createIndex(
-                        layer->objects().indexOf(object),
-                        0,
-                        layer.get());
-        }
-    }
-
     return QModelIndex();
 }
 
@@ -75,14 +62,6 @@ int SlippyMapLayerManager::rowCount(const QModelIndex &parent) const
 
     if (!parent.isValid()) {
         return m_layers.count();
-    }
-
-    SlippyMapLayer *ptr = static_cast<SlippyMapLayer*>(parent.internalPointer());
-    if (ptr != nullptr) {
-        for (auto const& layer: m_layers) {
-            if (layer == ptr)
-                return layer->objects().length();
-        }
     }
 
     return 0;
@@ -100,65 +79,31 @@ QVariant SlippyMapLayerManager::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    if (index.column() == 0) {
-        auto ptr = static_cast<SlippyMapLayer *>(index.internalPointer());
-        for (const auto &layer: m_layers) {
-            if (layer == ptr) {
-                switch (role) {
-                    case Qt::DisplayRole:
-                        return layer->name();
-                    case Qt::FontRole:
-                        if (!layer->isVisible()) {
-                            return m_hiddenFont;
-                        }
-                        else if (m_activeLayer == layer) {
-                            return m_activeFont;
-                        }
-                        return QVariant();
-                    case Qt::ForegroundRole:
-                        if (!layer->isVisible()) {
-                            return QColor(Qt::lightGray);
-                        }
-                        return QVariant();
-                    default:
-                        return QVariant();
-                }
-            }
-        }
-    }
+    if (index.column() == 0 && !index.parent().parent().isValid()) {
+        const auto& layer = m_layers.at(index.row());
 
-    SlippyMapLayerObject *obj = static_cast<SlippyMapLayerObject*>(index.internalPointer());
-
-    for (const auto& layer : m_layers) {
-        for (const auto& object: layer->objects()) {
-            if (object == obj) {
-                switch (role) {
-                    case Qt::UserRole:
-                        if (index.column() == 1)
-                            return QVariant::fromValue<void*>(obj);
-                        return QVariant();
-                    case Qt::DisplayRole:
-                        switch (index.column()) {
-                            case 0:
-                                return obj->label();
-                            default:
-                                return QVariant();
-                        }
-                    case Qt::FontRole:
-                        if (!obj->isVisible()) {
-                            return m_hiddenFont;
-                        }
-                        if (obj->isActive()) {
-                            return m_activeFont;
-                        }
-                        return QVariant();
-                    case Qt::ForegroundRole:
-                        if (!obj->isVisible()) {
-                            return QColor(Qt::lightGray);
-                        }
-                        return QVariant();
+        switch (role) {
+            case Qt::CheckStateRole:
+                return layer->isVisible() ? Qt::Checked : Qt::Unchecked;
+            case Qt::DecorationRole:
+                return layer->color();
+            case Qt::DisplayRole:
+                return layer->name();
+            case Qt::FontRole:
+                if (!layer->isVisible()) {
+                    return m_hiddenFont;
                 }
-            }
+                else if (m_activeLayer == layer) {
+                    return m_activeFont;
+                }
+                return QVariant();
+            case Qt::ForegroundRole:
+                if (!layer->isVisible()) {
+                    return QColor(Qt::lightGray);
+                }
+                return QVariant();
+            default:
+                return QVariant();
         }
     }
 
@@ -177,6 +122,23 @@ QVariant SlippyMapLayerManager::headerData(int section, Qt::Orientation orientat
         return tr("Layers");
 
     return {};
+}
+
+bool SlippyMapLayerManager::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (role == Qt::CheckStateRole) {
+        int row = index.row();
+        const auto& layer = m_layers.at(row);
+        qDebug() << "Setting checkable on" << layer->name() << "row" << row;
+        layer->setVisible(value.toBool());
+        emit dataChanged(
+                createIndex(row, 0),
+                createIndex(row, 0));
+        emit layerUpdated(layer);
+        return true;
+    }
+
+    return true;
 }
 
 void SlippyMapLayerManager::addLayer(SlippyMapLayer::Ptr layer)
@@ -204,15 +166,18 @@ void SlippyMapLayerManager::addLayerObject(SlippyMapLayer::Ptr layer, const Slip
     Q_CHECK_PTR(object);
     Q_ASSERT(m_layers.contains(SlippyMapLayer::Ptr(layer)));
 
-    int first = layer->objects().count();
-    int last = first + 1;
-    beginInsertRows(createIndex(
-            m_layers.indexOf(layer), 0, layer.get()), first, last);
+//    int first = layer->objects().count();
+//    int last = first + 1;
+//    beginInsertRows(createIndex(
+//            m_layers.indexOf(layer), 0, layer.get()), first, last);
     layer->addObject(object);
-    connect(object.get(), &SlippyMapLayerObject::updated, [this, object]() {
+    connect(object.get(),
+            &SlippyMapLayerObject::updated,
+            [this, object]() {
         emit layerObjectUpdated(object);
     });
-    endInsertRows();
+//    endInsertRows();
+
     emit layerObjectAdded(layer, object);
 }
 
@@ -221,16 +186,16 @@ void SlippyMapLayerManager::layer_onObjectAdded(const SlippyMapLayerObject::Ptr&
     Q_CHECK_PTR(object);
 
     // find out which row it belongs to
-    int r = 0;
-    for (int i = 0; i < m_layers.size(); i++) {
-        if (m_layers.at(i)->contains(object)) {
-            r = i;
-        }
-    }
-
-    QModelIndex begin = index(r, 0);
-    QModelIndex end = index(m_layers.at(r)->indexOf(object), 0, index(r, 0));
-    emit dataChanged(begin, end);
+//    int r = 0;
+//    for (int i = 0; i < m_layers.size(); i++) {
+//        if (m_layers.at(i)->contains(object)) {
+//            r = i;
+//        }
+//    }
+//
+//    QModelIndex begin = index(r, 0);
+//    QModelIndex end = index(m_layers.at(r)->indexOf(object), 0, index(r, 0));
+//    emit dataChanged(begin, end);
 }
 
 void SlippyMapLayerManager::addLayerObject(const SlippyMapLayerObject::Ptr& object)
@@ -251,28 +216,13 @@ void SlippyMapLayerManager::removeLayerObject(const SlippyMapLayer::Ptr& layer, 
     Q_CHECK_PTR(object);
     Q_ASSERT(m_layers.contains(layer));
 
-    beginRemoveRows(
-            createIndex(m_layers.indexOf(layer), 0, layer.get()),
-                layer->objects().indexOf(object),
-                layer->objects().indexOf(object));
-
-    layer->takeObject(object);
-    endRemoveRows();
+    layer->objects().removeOne(object);
 }
 
 void SlippyMapLayerManager::removeLayerObjects(SlippyMapLayer::Ptr layer)
 {
     Q_CHECK_PTR(layer);
-
-    beginRemoveRows(
-            createIndex(
-                    m_layers.indexOf(layer),
-                    0,
-                    layer.get()),
-            0, layer->objects().count() - 1);
-
     layer->removeAll();
-    endRemoveRows();
 }
 
 void SlippyMapLayerManager::takeLayer(SlippyMapLayer::Ptr layer)
@@ -299,6 +249,16 @@ void SlippyMapLayerManager::setActiveLayer(SlippyMapLayer::Ptr layer)
     emit dataChanged(
             index(0, 0),
             index(m_layers.count() - 1, 0));
+}
+
+void SlippyMapLayerManager::deactivateLayer()
+{
+    if (m_activeLayer != nullptr) {
+        m_activeLayer = nullptr;
+        emit dataChanged(
+                index(0, 0),
+                index(m_layers.count() - 1, 0));
+    }
 }
 
 void SlippyMapLayerManager::setDefaultLayer(SlippyMapLayer::Ptr layer)
@@ -421,5 +381,60 @@ void SlippyMapLayerManager::replaceObject(const SlippyMapLayerObject::Ptr& objec
             layer_onObjectUpdated(replacement);
             return;
         }
+    }
+}
+
+SlippyMapLayer::Ptr SlippyMapLayerManager::layerForObject(const SlippyMapLayerObject::Ptr &object)
+{
+    for (const auto& layer: m_layers) {
+        if (layer->contains(object))
+            return layer;
+    }
+
+    return {};
+}
+
+void SlippyMapLayerManager::setVisbleObjectsList(const QList<SlippyMapLayerObject::Ptr> &visibleObjects)
+{
+    m_visibleObjects = visibleObjects;
+    emit dataChanged(createIndex(0,0), createIndex(0,0));
+}
+
+Qt::ItemFlags SlippyMapLayerManager::flags(const QModelIndex &index) const
+{
+    if (index.isValid())
+        return Qt::ItemFlags(Qt::ItemIsUserCheckable | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    return QAbstractItemModel::flags(index);
+}
+
+bool SlippyMapLayerManager::sortComparisonName(const SlippyMapLayer::Ptr &left, const SlippyMapLayer::Ptr &right)
+{
+    return QString::compare(left->name(), right->name()) > 0;
+}
+
+bool SlippyMapLayerManager::sortComparisonOrder(const SlippyMapLayer::Ptr &left, const SlippyMapLayer::Ptr &right)
+{
+    return left->order() < right->order();
+}
+
+void SlippyMapLayerManager::sort(SlippyMapLayerManager::LayerSortMethod method, Qt::SortOrder order)
+{
+    switch (method) {
+        case LayerSortName:
+            qSort(
+                    m_layers.begin(),
+                    m_layers.end(),
+                    SlippyMapLayerManager::sortComparisonName);
+            if (order == Qt::AscendingOrder)
+                std::reverse(m_layers.begin(), m_layers.end());
+            break;
+        case LayerSortOrder:
+            qSort(
+                    m_layers.begin(),
+                    m_layers.end(),
+                    SlippyMapLayerManager::sortComparisonOrder);
+            if (order == Qt::AscendingOrder)
+                std::reverse(m_layers.begin(), m_layers.end());
+            break;
     }
 }
