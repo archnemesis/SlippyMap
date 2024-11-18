@@ -1213,21 +1213,15 @@ void SlippyMapWidget::remap()
                         }
                         else {
                             tiles_to_load++;
+
                             QNetworkRequest req(tileUrl);
                             req.setRawHeader(QByteArray("User-Agent"), m_userAgentString.toLocal8Bit());
                             req.setSslConfiguration(QSslConfiguration::defaultConfiguration());
                             emit tileRequestInitiated();
+
                             QNetworkReply *reply = m_net->get(req);
                             tile->setPendingReply(reply);
-                            // connect(reply,
-                            //         &QNetworkReply::errorOccurred,
-                            //         [=](QNetworkReply::NetworkError code){
-                            //             qWarning() << "Got a network error:" << code;
-                            //             if (tile->isDiscarded()) {
-                            //                 reply->deleteLater();
-                            //                 delete tile;
-                            //             }
-                            // });
+
                             connect(reply,
                                     &QNetworkReply::finished,
                                     [this, tile, layer, cachedFileName, reply]() {

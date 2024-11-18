@@ -37,6 +37,8 @@ namespace SlippyMap
         void setSynced(bool synced);
         void setOrder(int order);
         void setColor(const QColor& color);
+        void setShowInLayerView(bool show);
+        bool showInLayerView() const;
         bool contains(SlippyMapLayerObject::Ptr object);
         void replace(SlippyMapLayerObject::Ptr object, SlippyMapLayerObject::Ptr replacement);
         int indexOf(SlippyMapLayerObject::Ptr object);
@@ -58,6 +60,7 @@ namespace SlippyMap
         bool m_visible = true;
         bool m_editable = true;
         bool m_synced = false;
+        bool m_showInLayerView = true;
         QVariant m_id;
         QString m_name;
         QString m_description;

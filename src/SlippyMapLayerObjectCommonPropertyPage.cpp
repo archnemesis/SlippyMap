@@ -14,14 +14,16 @@
 #include <QComboBox>
 
 SlippyMapLayerObjectCommonPropertyPage::SlippyMapLayerObjectCommonPropertyPage(
-    SlippyMap::SlippyMapLayerObject::Ptr object) :
-    SlippyMapLayerObjectPropertyPage(object)
+SlippyMap::SlippyMapLayerObject::Ptr object,
+    QWidget *parent) :
+    SlippyMapLayerObjectPropertyPage(object, parent)
 {
 }
 
 SlippyMapLayerObjectCommonPropertyPage::SlippyMapLayerObjectCommonPropertyPage(
         SlippyMap::SlippyMapLayerObject::Ptr object,
-        SlippyMapLayerManager *layerManager) :
+        SlippyMapLayerManager *layerManager,
+        QWidget *parent) :
         SlippyMapLayerObjectPropertyPage(object),
         m_layerManager(layerManager)
 {
@@ -106,6 +108,7 @@ void SlippyMapLayerObjectCommonPropertyPage::setupUi()
         m_latitude->setEnabled(false);
         m_longitude->setEnabled(false);
         m_visibility->setEnabled(false);
+        m_layerComboBox->setEnabled(false);
     }
 
     m_label->setText(m_object->label());

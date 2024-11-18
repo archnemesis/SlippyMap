@@ -161,6 +161,16 @@ void SlippyMapLayer::setColor(const QColor &color)
     m_color = color;
 }
 
+void SlippyMapLayer::setShowInLayerView(bool show)
+{
+    m_showInLayerView = show;
+}
+
+bool SlippyMapLayer::showInLayerView() const
+{
+    return m_showInLayerView;
+}
+
 const QColor &SlippyMapLayer::color() const
 {
     return m_color;

@@ -27,16 +27,15 @@ QModelIndex SlippyMapLayerManager::index(int row, int column, const QModelIndex 
             return QModelIndex();
         }
     }
-    else {
-        auto *ptr = static_cast<SlippyMapLayer*>(parent.internalPointer());
 
-        for (const auto& layer: m_layers) {
-            if (layer.get() == ptr)
-                return createIndex(row, column, layer->objects().at(row).get());
-        }
+    auto *ptr = static_cast<SlippyMapLayer*>(parent.internalPointer());
 
-        return QModelIndex();
+    for (const auto& layer: m_layers) {
+        if (layer.get() == ptr)
+            return createIndex(row, column, layer->objects().at(row).get());
     }
+
+    return QModelIndex();
 }
 
 QModelIndex SlippyMapLayerManager::parent(const QModelIndex &index) const
@@ -166,17 +165,12 @@ void SlippyMapLayerManager::addLayerObject(SlippyMapLayer::Ptr layer, const Slip
     Q_CHECK_PTR(object);
     Q_ASSERT(m_layers.contains(SlippyMapLayer::Ptr(layer)));
 
-//    int first = layer->objects().count();
-//    int last = first + 1;
-//    beginInsertRows(createIndex(
-//            m_layers.indexOf(layer), 0, layer.get()), first, last);
     layer->addObject(object);
     connect(object.get(),
             &SlippyMapLayerObject::updated,
             [this, object]() {
         emit layerObjectUpdated(object);
     });
-//    endInsertRows();
 
     emit layerObjectAdded(layer, object);
 }
@@ -222,6 +216,11 @@ void SlippyMapLayerManager::removeLayerObject(const SlippyMapLayer::Ptr& layer, 
 void SlippyMapLayerManager::removeLayerObjects(SlippyMapLayer::Ptr layer)
 {
     Q_CHECK_PTR(layer);
+
+    for (auto object: layer->objects()) {
+        object.clear();
+    }
+
     layer->removeAll();
 }
 

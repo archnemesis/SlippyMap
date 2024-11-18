@@ -73,6 +73,7 @@ namespace SlippyMap
         void layerObjectUpdated(const SlippyMapLayerObject::Ptr& object);
     protected:
         QList<SlippyMapLayer::Ptr> m_layers;
+        QList<SlippyMapLayer::Ptr> m_hiddenLayers;
         QList<SlippyMapAnimatedLayer::Ptr> m_animatedLayers;
         SlippyMapLayer::Ptr m_activeLayer = nullptr;
         SlippyMapLayer::Ptr m_defaultLayer = nullptr;
