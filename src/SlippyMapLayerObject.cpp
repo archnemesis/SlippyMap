@@ -147,9 +147,19 @@ void SlippyMapLayerObject::setId(const QVariant &id)
     m_id = id;
 }
 
+void SlippyMapLayerObject::setLayerId(const QVariant& layerId)
+{
+    m_layerId = layerId;
+}
+
 QVariant SlippyMapLayerObject::id() const
 {
     return m_id;
+}
+
+QVariant SlippyMapLayerObject::layerId() const
+{
+    return m_layerId;
 }
 
 void SlippyMapLayerObject::setSynced(bool synced)

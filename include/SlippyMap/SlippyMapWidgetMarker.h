@@ -56,7 +56,7 @@ namespace SlippyMap
         QDataStream& serialize(QDataStream& stream) const override;
         void unserialize(QDataStream& stream) override;
         virtual void hydrateFromDatabase(const QJsonObject& json, const QString& geometry) override;
-        virtual void saveToDatabase(QJsonObject& json, QString& geometry) override;
+        virtual void packageObjectData(QJsonObject& json, QString& geometry) override;
 
     signals:
         void positionChanged();

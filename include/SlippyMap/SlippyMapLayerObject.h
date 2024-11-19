@@ -41,7 +41,7 @@ namespace SlippyMap
         virtual void unserialize(QDataStream& stream) = 0;
         virtual bool contains(const QPointF& point, int zoom) const = 0;
         virtual void hydrateFromDatabase(const QJsonObject& json, const QString& geometry) = 0;
-        virtual void saveToDatabase(QJsonObject& json, QString& geometry) = 0;
+        virtual void packageObjectData(QJsonObject& json, QString& geometry) = 0;
         virtual bool isIntersectedBy(const QRectF& rect) const = 0;
         virtual bool isMovable();
         virtual bool isEditable();
@@ -50,9 +50,11 @@ namespace SlippyMap
         virtual const QSizeF size() const = 0;
         virtual QString statusBarText();
         QVariant id() const;
+        QVariant layerId() const;
         QString label() const;
         QString description() const;
         void setId(const QVariant& id);
+        void setLayerId(const QVariant& layerId);
         void setLabel(const QString& name);
         void setDescription(const QString& description);
         void setVisible(bool visible);
@@ -104,6 +106,7 @@ namespace SlippyMap
 
     protected:
         QVariant m_id;
+        QVariant m_layerId;
         QString m_label;
         QString m_description;
         QBrush m_brush;

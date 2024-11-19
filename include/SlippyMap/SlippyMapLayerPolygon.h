@@ -30,7 +30,7 @@ namespace SlippyMap {
         QDataStream& serialize(QDataStream& stream) const override;
         void unserialize(QDataStream& stream) override;
         void hydrateFromDatabase(const QJsonObject& json, const QString& geometry) override;
-        void saveToDatabase(QJsonObject& json, QString& geometry) override;
+        void packageObjectData(QJsonObject& json, QString& geometry) override;
         QList<SlippyMapLayerObjectPropertyPage*> propertyPages(SlippyMapLayerObject::Ptr object) const;
         bool contains(const QPointF& point, int zoom) const override;
         bool isIntersectedBy(const QRectF& rect) const override;

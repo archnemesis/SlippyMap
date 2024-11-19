@@ -85,7 +85,7 @@ void SlippyMapLayerPolygon::hydrateFromDatabase(const QJsonObject &json, const Q
     emit updated();
 }
 
-void SlippyMapLayerPolygon::saveToDatabase(QJsonObject &json, QString &geometry)
+void SlippyMapLayerPolygon::packageObjectData(QJsonObject &json, QString &geometry)
 {
     json["strokeWidth"] = strokeWidth();
     json["strokeColor"] = strokeColor().name(QColor::HexArgb);

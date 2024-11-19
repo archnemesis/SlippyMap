@@ -119,7 +119,7 @@ void SlippyMapWidgetMarker::hydrateFromDatabase(const QJsonObject &json, const Q
     emit updated();
 }
 
-void SlippyMapWidgetMarker::saveToDatabase(QJsonObject &json, QString &geometry)
+void SlippyMapWidgetMarker::packageObjectData(QJsonObject &json, QString &geometry)
 {
     json["radius"] = radius();
     json["color"] = color().name(QColor::HexArgb);
