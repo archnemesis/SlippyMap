@@ -373,7 +373,7 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
     m2.scale(1.0/degPerPixelX(), -(1.0/degPerPixelY()));
     QTransform m3(m1 * m2);
 
-    m_visibleObjects.clear();
+    //m_visibleObjects.clear();
 
     if (m_layerManager != nullptr) {
         for (const auto& layer : m_layerManager->layers()) {
@@ -382,7 +382,7 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
                     if (obj->isVisible() && m_activeObject != obj) {
                         if (obj->isIntersectedBy(bbox)) {
                             obj->draw(&painter, m3, SlippyMapLayerObject::NormalState);
-                            m_visibleObjects.append(obj);
+                            //m_visibleObjects.append(obj);
                         }
                     }
                 }
@@ -392,7 +392,7 @@ void SlippyMapWidget::paintEvent(QPaintEvent *event)
                     if (obj->isVisible() && m_activeObject == obj) {
                         if (obj->isIntersectedBy(bbox)) {
                             obj->draw(&painter, m3, SlippyMapLayerObject::SelectedState);
-                            m_visibleObjects.append(obj);
+                            //m_visibleObjects.append(obj);
                         }
                     }
                 }
@@ -596,17 +596,19 @@ void SlippyMapWidget::mousePressEvent(QMouseEvent *event)
         if (m_drawMode == NoDrawing) {
             setCursor(Qt::ClosedHandCursor);
 
-            for (const auto& object: m_visibleObjects) {
-                if (object->isMovable() && object->isEditable()) {
-                    if (object->contains(mouseCoords, m_zoomLevel)) {
-                        m_dragObject = object;
-                        m_activeObject = object;
-                        m_layerManager->setActiveLayer(m_layerManager->layerForObject(object));
-                        m_layerManager->deactivateActiveObject();
-                        object->setActive(true);
-                        emit objectActivated(object);
-                        update();
-                        break;
+            for (const auto& layer: m_layerManager->layers()) {
+                for (const auto& object: layer->objects()) {
+                    if (object->isMovable() && object->isEditable() && object->isVisible()) {
+                        if (object->contains(mouseCoords, m_zoomLevel)) {
+                            m_dragObject = object;
+                            m_activeObject = object;
+                            m_layerManager->setActiveLayer(m_layerManager->layerForObject(object));
+                            m_layerManager->deactivateActiveObject();
+                            object->setActive(true);
+                            emit objectActivated(object);
+                            update();
+                            break;
+                        }
                     }
                 }
             }
@@ -680,16 +682,18 @@ void SlippyMapWidget::mouseReleaseEvent(QMouseEvent *event)
 //                    }
 //                }
 
-                for (const auto& object: m_visibleObjects) {
-                    if (object->contains(geoPos, m_zoomLevel)) {
-                        if (m_activeObject == object) return;
-                        m_activeObject = object;
-                        m_layerManager->setActiveLayer(m_layerManager->layerForObject(object));
-                        m_layerManager->deactivateActiveObject();
-                        object->setActive(true);
-                        emit objectActivated(object);
-                        update();
-                        return;
+                for (const auto& layer: m_layerManager->layers()) {
+                    for (const auto& object: layer->objects()) {
+                        if (object->contains(geoPos, m_zoomLevel)) {
+                            if (m_activeObject == object) return;
+                            m_activeObject = object;
+                            m_layerManager->setActiveLayer(m_layerManager->layerForObject(object));
+                            m_layerManager->deactivateActiveObject();
+                            object->setActive(true);
+                            emit objectActivated(object);
+                            update();
+                            return;
+                        }
                     }
                 }
 
@@ -1394,6 +1398,12 @@ void SlippyMapWidget::setActiveObject(SlippyMapLayerObject::Ptr object)
         }
     }
 
+}
+
+void SlippyMapWidget::deactivateActiveObject()
+{
+    m_layerManager->deactivateActiveObject();
+    m_activeObject.clear();
 }
 
 void SlippyMapWidget::nextFrame()

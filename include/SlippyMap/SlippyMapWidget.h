@@ -103,6 +103,7 @@ namespace SlippyMap
         void setUserAgent(const QString& userAgent);
         void takeLayer(SlippyMapWidgetLayer *layer);
         void setActiveObject(SlippyMapLayerObject::Ptr object);
+        void deactivateActiveObject();
         void setCrosshairsEnabled(bool enabled);
 
     public slots:

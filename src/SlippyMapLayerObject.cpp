@@ -139,7 +139,7 @@ void SlippyMapLayerObject::copy(SlippyMapLayerObject *other)
 
 SlippyMapLayerObject::~SlippyMapLayerObject()
 {
-    qDebug() << "Object" << label() << "deleted";
+    qDebug() << "Object deleted";
 }
 
 void SlippyMapLayerObject::setId(const QVariant &id)

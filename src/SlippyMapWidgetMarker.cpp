@@ -125,8 +125,8 @@ void SlippyMapWidgetMarker::packageObjectData(QJsonObject &json, QString &geomet
     json["color"] = color().name(QColor::HexArgb);
 
     geometry = QString("POINT(%1 %2)")
-            .arg(position().x())
-            .arg(position().y());
+            .arg(position().x(), 0, 'f', 7)
+            .arg(position().y(), 0, 'f', 7);
 }
 
 QDataStream& SlippyMapWidgetMarker::serialize(QDataStream& stream) const

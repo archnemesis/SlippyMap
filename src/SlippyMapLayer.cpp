@@ -25,7 +25,7 @@ void SlippyMapLayer::takeObject(SlippyMapLayerObject::Ptr object)
     emit objectRemoved(object);
 }
 
-QList<SlippyMapLayerObject::Ptr> SlippyMapLayer::objects() const
+const QList<SlippyMapLayerObject::Ptr>& SlippyMapLayer::objects() const
 {
     return m_objects;
 }
@@ -99,6 +99,12 @@ void SlippyMapLayer::hideAll()
     for (const auto& object: m_objects) {
         object->setVisible(false);
     }
+}
+
+void SlippyMapLayer::removeObject(SlippyMapLayerObject::Ptr object)
+{
+    Q_ASSERT(m_objects.contains(object));
+    m_objects.removeOne(object);
 }
 
 void SlippyMapLayer::objectChanged()

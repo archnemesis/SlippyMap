@@ -38,7 +38,7 @@ namespace SlippyMap
         bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 
         void addLayer(SlippyMapLayer::Ptr layer);
-        void addLayerObject(SlippyMapLayer::Ptr layer, const SlippyMapLayerObject::Ptr& object);
+        void addLayerObject(const SlippyMapLayer::Ptr& layer, const SlippyMapLayerObject::Ptr& object);
         void addLayerObject(const SlippyMapLayerObject::Ptr& object);
         void removeLayerObject(const SlippyMapLayer::Ptr& layer, const SlippyMapLayerObject::Ptr& object);
         void removeLayerObjects(SlippyMapLayer::Ptr layer);

@@ -3,6 +3,7 @@
 
 #define NOMINMAX
 #include <algorithm>
+#include <corecrt_math_defines.h>
 #include <QApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -258,17 +259,25 @@ int SlippyMapLayerPolygon::strokeWidth() const
 void SlippyMapLayerPolygon::initStyle()
 {
     m_strokePen.setStyle(Qt::SolidLine);
-    m_strokePen.setCosmetic(true);
+    //m_strokePen.setCosmetic(true);
     m_strokePen.setJoinStyle(Qt::MiterJoin);
     m_strokePen.setCapStyle(Qt::SquareCap);
     m_strokePen.setWidth(m_strokeWidth);
     m_strokePen.setColor(m_strokeColor);
 
+    // width is in meters
+    // convert to degrees
+    qreal lat_dist_per_deg = 111.32 * 1000; // 111.32 km, or 1,113,200 meters
+    qreal lon_dist_per_deg = 111.32 * 1000 * cos((M_PI / 180.0) * position().y());
+    qreal avg_dist_per_deg = (lat_dist_per_deg + lon_dist_per_deg) / 2.0;
+    qreal deg_per_1m = 1.0 / avg_dist_per_deg;
+
+    m_strokePen.setWidthF(deg_per_1m * static_cast<qreal>(m_strokeWidth));
+
     m_strokePenSelected.setStyle(Qt::SolidLine);
-    m_strokePenSelected.setCosmetic(true);
     m_strokePenSelected.setJoinStyle(Qt::MiterJoin);
     m_strokePenSelected.setCapStyle(Qt::SquareCap);
-    m_strokePenSelected.setWidth(m_strokeWidth);
+    m_strokePenSelected.setWidthF(deg_per_1m * static_cast<qreal>(m_strokeWidth));
     m_strokePenSelected.setColor(m_strokeColor.lighter());
 
     m_fillBrush.setStyle(Qt::SolidPattern);

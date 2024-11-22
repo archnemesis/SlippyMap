@@ -20,7 +20,7 @@ namespace SlippyMap
         ~SlippyMapLayer();
         void addObject(SlippyMapLayerObject::Ptr object);
         void takeObject(SlippyMapLayerObject::Ptr object);
-        QList<SlippyMapLayerObject::Ptr> objects() const;
+        const QList<SlippyMapLayerObject::Ptr>& objects() const;
         QVariant id() const;
         QString name() const;
         QString description() const;
@@ -46,6 +46,7 @@ namespace SlippyMap
         void removeAll();
         void showAll();
         void hideAll();
+        void removeObject(SlippyMapLayerObject::Ptr object);
 
     signals:
         void objectAdded(SlippyMapLayerObject::Ptr object);
